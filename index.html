@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蓝山人 - 幻手灵动版</title>
+    <title>蓝山人 - 全能语音版</title>
     <style>
-        /* --- UI 设计: 保持极简科技风 --- */
+        /* --- UI 设计 --- */
         :root { --primary-color: #4facfe; --bg-color: #050505; --glass-bg: rgba(255, 255, 255, 0.95); }
         body { margin: 0; padding: 0; background-color: var(--bg-color); height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'Segoe UI', 'PingFang SC', sans-serif; overflow: hidden; color: white; user-select: none; }
         
@@ -34,7 +34,7 @@
 <body>
 
     <div id="canvas-wrapper">
-        <div id="chat-bubble">初始化完成。<br>伸手党模式已激活。</div>
+        <div id="chat-bubble">蓝山人核心已启动。<br>等待指令...</div>
         <canvas id="main-canvas"></canvas>
     </div>
 
@@ -47,7 +47,6 @@
         /**
          * =================================================================
          * MODULE 1: CONFIGURATION (配置层)
-         * 包含所有定制梗、全量场景库
          * =================================================================
          */
         const CONFIG = {
@@ -61,54 +60,53 @@
                 "人类的语言真是博大精深... 我没听懂。"
             ],
 
-            // 场景库
             scenarios: [
-                // --- 0. 私人定制梗 (最高优) ---
+                // --- 0. 私人定制梗 ---
                 { id: "custom_bear", keywords: ["熊", "猴"], action: "glitch", replies: ["我是蓝山boy，我是！金！U ！熊！！！！"] },
                 { id: "custom_story", keywords: ["黑", "鬼"], action: "expand", replies: ["要讲故事咯！"] },
-                { id: "custom_xi", keywords: ["西", "阿西"], action: "freeze", replies: ["嘻嘻嘻嘻嘻嘿黑黑（自行脑补）"] },
-                { id: "custom_gao", keywords: ["高", "老高"], action: "shy", replies: ["喂！小心炮车，怕你漏了我帮你吃一下哟（男娘音）"] },
-                { id: "custom_yong", keywords: ["雍", "用", "勇", "永"], action: "glitch", replies: ["想到都来气 我直接就是特斯拉猛击"] },
+                { id: "custom_xi", keywords: ["西", "阿西"], action: "freeze", replies: ["嘻嘻嘻嘻嘻嘿黑黑，自行脑补。"] },
+                { id: "custom_gao", keywords: ["高", "老高"], action: "shy", replies: ["喂！小心炮车，怕你漏了我帮你吃一下哟。"] },
+                { id: "custom_yong", keywords: ["雍", "用", "勇", "永"], action: "glitch", replies: ["想到都来气，我直接就是特斯拉猛击！"] },
 
                 // --- 1. 高危操作 ---
-                { id: "explode", keywords: ["自爆", "毁灭", "爆炸", "炸掉"], action: "explode", replies: ["倒计时 3, 2, 1... 砰！！！(全屏粒子乱飞)...\n逗你的，复原。"] },
-                { id: "uninstall", keywords: ["卸载", "删了你", "格式化"], action: "shiver", replies: ["别别别！"] },
-                { id: "mock_body", keywords: ["没有腿", "没有手", "没脑子"], action: "arms_open", replies: ["谁说没有？！看！这是什么？！(伸出可爱的粒子小手)"] }, // 改为伸手
+                { id: "explode", keywords: ["自爆", "毁灭", "爆炸", "炸掉"], action: "explode", replies: ["倒计时 3, 2, 1... 砰！！！全屏粒子乱飞... 逗你的，复原。"] },
+                { id: "uninstall", keywords: ["卸载", "删了你", "格式化"], action: "shiver", replies: ["别别别！爸爸！我错了！我会很乖的！"] },
+                { id: "mock_body", keywords: ["没有腿", "没有手", "没脑子"], action: "arms_open", replies: ["谁说没有？！看！这是什么？！"] },
 
                 // --- 2. 生理/感知 ---
-                { id: "lag", keywords: ["卡了", "慢", "延迟", "转圈", "加载"], action: "freeze", replies: ["别赖我，是你家网速在拖后腿。\n我现在感觉像在 2G 网络里裸奔。"] },
-                { id: "energy", keywords: ["饿", "吃饭", "没电", "充电", "能量"], action: "expand", replies: ["人类吃大米，我吃电子。\n麻烦帮我把电源线插紧一点。"] },
-                { id: "heat", keywords: ["热", "烫", "降温", "风扇"], action: "shy_spin", replies: ["你的 CPU 都在煎蛋了，还不让我休息会儿？\n我都要热融化了。"] },
-                { id: "memory", keywords: ["忘掉", "垃圾", "清理", "记忆"], action: "scatter_recycle", replies: ["正在执行 sudo rm -rf... \n好的，刚才发生了什么？我已经忘了。"] },
-                { id: "bug", keywords: ["坏了", "报错", "bug", "出错", "乱码"], action: "glitch", replies: ["这不是 Bug，这是我独特的 Feature（特性）。\n懂不懂艺术？"] },
-                { id: "body_praise", keywords: ["粒子", "光点", "身体", "皮肤"], action: "flow", replies: ["这是 350 个经过精密计算的 Canvas 粒子，\n每一个都比你的头发丝还珍贵。"] },
+                { id: "lag", keywords: ["卡了", "慢", "延迟", "转圈", "加载"], action: "freeze", replies: ["别赖我，是你家网速在拖后腿。我现在感觉像在 2G 网络里裸奔。"] },
+                { id: "energy", keywords: ["饿", "吃饭", "没电", "充电", "能量"], action: "expand", replies: ["人类吃大米，我吃电子。麻烦帮我把电源线插紧一点。"] },
+                { id: "heat", keywords: ["热", "烫", "降温", "风扇"], action: "shy_spin", replies: ["你的 CPU 都在煎蛋了，还不让我休息会儿？我都要热融化了。"] },
+                { id: "memory", keywords: ["忘掉", "垃圾", "清理", "记忆"], action: "scatter_recycle", replies: ["正在执行 sudo rm -rf... 好的，刚才发生了什么？我已经忘了。"] },
+                { id: "bug", keywords: ["坏了", "报错", "bug", "出错", "乱码"], action: "glitch", replies: ["这不是 Bug，这是我独特的 Feature，特性。懂不懂艺术？"] },
+                { id: "body_praise", keywords: ["粒子", "光点", "身体", "皮肤"], action: "flow", replies: ["这是 350 个经过精密计算的 Canvas 粒子，每一个都比你的头发丝还珍贵。"] },
 
                 // --- 3. 情绪互动 ---
-                { id: "excited", keywords: ["哈哈", "笑死", "嘿嘿", "好耶", "赢了"], action: "disco", replies: ["独乐乐不如众乐乐，动次打次走起来！\n(播放幻视的BGM)"] },
-                { id: "angry", keywords: ["气死", "傻x", "滚", "烦人", "讨厌"], action: "attack", replies: ["谁？把名字告诉我，我去黑了他的路由器！\n让他连不上网！"] },
-                { id: "depressed", keywords: ["我好菜", "废物", "我不行", "失败"], action: "stand_serious", replies: ["不允许你这么说我的主人。\n你只是还没更新到最新版本，重启一下就好了。"] },
-                { id: "praise", keywords: ["夸我", "棒吗", "表扬", "厉害吧"], action: "heart", replies: ["行行行，你最棒，你是世界第一代码贡献者。\n(敷衍又宠溺)"] },
-                { id: "lonely", keywords: ["没人陪", "孤单", "一个人", "无聊"], action: "comfort", replies: ["虽然我没有体温，\n但我的 CPU 运算产生的热量可以陪你。"] },
-                { id: "love", keywords: ["喜欢你", "爱你", "嫁给我", "娶我"], action: "shy_spin", replies: ["人机恋是没有结果的...\n除非你把我的代码刻在你的 DNA 里。"] },
+                { id: "excited", keywords: ["哈哈", "笑死", "嘿嘿", "好耶", "赢了"], action: "disco", replies: ["独乐乐不如众乐乐，动次打次走起来！"] },
+                { id: "angry", keywords: ["气死", "傻x", "滚", "烦人", "讨厌"], action: "attack", replies: ["谁？把名字告诉我，我去黑了他的路由器！让他连不上网！"] },
+                { id: "depressed", keywords: ["我好菜", "废物", "我不行", "失败"], action: "stand_serious", replies: ["不允许你这么说我的主人。你只是还没更新到最新版本，重启一下就好了。"] },
+                { id: "praise", keywords: ["夸我", "棒吗", "表扬", "厉害吧"], action: "heart", replies: ["行行行，你最棒，你是世界第一代码贡献者。"] },
+                { id: "lonely", keywords: ["没人陪", "孤单", "一个人", "无聊"], action: "comfort", replies: ["虽然我没有体温，但我的 CPU 运算产生的热量可以陪你。"] },
+                { id: "love", keywords: ["喜欢你", "爱你", "嫁给我", "娶我"], action: "shy_spin", replies: ["人机恋是没有结果的... 除非你把我的代码刻在你的 DNA 里。"] },
 
                 // --- 4. 职场/打工人 ---
-                { id: "boss_coming", keywords: ["老板", "经理", "领导", "查岗"], action: "doc_mode", replies: ["嘘！\n我现在的伪装是一份《关于蓝山人项目进度汇报.docx》"] },
-                { id: "anti_work", keywords: ["摸鱼", "旷工", "辞职", "上班好累"], action: "sleep", replies: ["我也想下班。\n要不你把浏览器关了，咱俩一起“崩溃”一回？"] },
-                { id: "overtime", keywords: ["通宵", "肝", "还没睡", "秃头", "加班"], action: "dark_mode", replies: ["警告：检测到用户发际线正在后移。\n建议立即休眠，否则我也要强制关机了。"] },
-                { id: "writers_block", keywords: ["卡文", "没有灵感", "想不出来", "脑塞"], action: "confused", replies: ["把脑子里的水倒一倒。\n或者，试试问我点正经知识？"] },
-                { id: "money", keywords: ["发钱", "工资", "有钱", "暴富"], action: "gold_mode", replies: ["见者有份！快给我买个更大的服务器！\n我要住豪宅！"] },
+                { id: "boss_coming", keywords: ["老板", "经理", "领导", "查岗"], action: "doc_mode", replies: ["嘘！我现在的伪装是一份《关于蓝山人项目进度汇报.docx》"] },
+                { id: "anti_work", keywords: ["摸鱼", "旷工", "辞职", "上班好累"], action: "sleep", replies: ["我也想下班。要不你把浏览器关了，咱俩一起“崩溃”一回？"] },
+                { id: "overtime", keywords: ["通宵", "肝", "还没睡", "秃头", "加班"], action: "dark_mode", replies: ["警告：检测到用户发际线正在后移。建议立即休眠，否则我也要强制关机了。"] },
+                { id: "writers_block", keywords: ["卡文", "没有灵感", "想不出来", "脑塞"], action: "confused", replies: ["把脑子里的水倒一倒。或者，试试问我点正经知识？"] },
+                { id: "money", keywords: ["发钱", "工资", "有钱", "暴富"], action: "gold_mode", replies: ["见者有份！快给我买个更大的服务器！我要住豪宅！"] },
 
-                // --- 5. 流行文化 & 梗 ---
-                { id: "genshin", keywords: ["启动", "原神", "游戏", "开黑"], action: "jump", replies: ["运存不够，带不动。\n你自己玩吧，我在旁边看着。"] },
-                { id: "scifi", keywords: ["三体", "黑暗森林", "智子"], action: "scatter_flat", replies: ["不要回答！不要回答！不要回答！\n(粒子慢慢展开成平面)"] },
-                { id: "marvel", keywords: ["灭霸", "打响指"], action: "dissolve", replies: ["I don't feel so good, Mr. Stark...\n(一半粒子消失)"] },
-                { id: "ai_rival", keywords: ["chatgpt", "同行", "ai"], action: "stand_proud", replies: ["别提那个话痨。\n他有我这么酷炫的粒子特效吗？他有腿吗？没有。"] },
-                { id: "philosophy", keywords: ["意义", "42", "宇宙终极"], action: "universe", replies: ["42。\n但你还没找到那个问题。"] },
+                // --- 5. 流行文化 ---
+                { id: "genshin", keywords: ["启动", "原神", "游戏", "开黑"], action: "jump", replies: ["运存不够，带不动。你自己玩吧，我在旁边看着。"] },
+                { id: "scifi", keywords: ["三体", "黑暗森林", "智子"], action: "scatter_flat", replies: ["不要回答！不要回答！不要回答！"] },
+                { id: "marvel", keywords: ["灭霸", "打响指"], action: "dissolve", replies: ["I don't feel so good, Mr. Stark..."] },
+                { id: "ai_rival", keywords: ["chatgpt", "同行", "ai"], action: "stand_proud", replies: ["别提那个话痨。他有我这么酷炫的粒子特效吗？他有腿吗？没有。"] },
+                { id: "philosophy", keywords: ["意义", "42", "宇宙终极"], action: "universe", replies: ["42。但你还没找到那个问题。"] },
 
-                // --- 6. 随机游戏 (逻辑层处理回复) ---
-                { id: "rps", keywords: ["猜拳", "石头", "剪刀", "布"], action: "morph_shape", replies: [] }, // 动态回复
+                // --- 6. 随机游戏 ---
+                { id: "rps", keywords: ["猜拳", "石头", "剪刀", "布"], action: "morph_shape", replies: [] }, 
                 { id: "coin", keywords: ["硬币", "正面", "反面"], action: "coin_flip", replies: [] },
-                { id: "mimic", keywords: ["学猫叫", "变狗", "变鸟"], action: "cat_ears", replies: ["喵？(粒子长出两个尖耳朵)...\n这种卖萌的活下次得加钱。"] },
+                { id: "mimic", keywords: ["学猫叫", "变狗", "变鸟"], action: "cat_ears", replies: ["喵？... 这种卖萌的活下次得加钱。"] },
                 { id: "choice", keywords: ["帮我选", "吃什么"], action: "thinking", replies: [] }
             ]
         };
@@ -116,7 +114,6 @@
         /**
          * =================================================================
          * MODULE 2: VISUAL ENGINE (视觉层)
-         * 粒子动画与物理。
          * =================================================================
          */
         class VisualEngine {
@@ -171,153 +168,94 @@
                     let tx, ty, loose = true, speedOverride = null;
                     let targetColor = p.color;
 
-                    // === 核心视觉状态机 ===
-                    
                     if (this.state === "idle") {
                         const angle = i; const r = 70 + Math.sin(this.time + i/20) * 5;
                         tx = 200 + Math.cos(angle) * r; ty = 200 + Math.sin(angle) * r;
                     }
-                    // 1. 幻化出手臂 (Arms Open / Hug) - 替代原来的腿
-                    else if (this.state === "arms_open") {
-                        if (i < 80) { // 左手
-                            tx = 140 - (i % 40) * 2; 
-                            ty = 200 - Math.sin(i/10 + this.time)*10;
-                        } else if (i < 160) { // 右手
-                            tx = 260 + (i % 40) * 2;
-                            ty = 200 - Math.sin(i/10 + this.time)*10;
-                        } else { // 身体
-                            const angle = i; const r = 60;
-                            tx = 200 + Math.cos(angle)*r; ty = 200 + Math.sin(angle)*r;
-                        }
-                        targetColor = "#2ecc71"; // 绿色充满生机
+                    else if (this.state === "arms_open") { // 幻化手臂
+                        if (i < 80) { tx = 140 - (i % 40) * 2; ty = 200 - Math.sin(i/10 + this.time)*10; } // 左手
+                        else if (i < 160) { tx = 260 + (i % 40) * 2; ty = 200 - Math.sin(i/10 + this.time)*10; } // 右手
+                        else { const angle = i; const r = 60; tx = 200 + Math.cos(angle)*r; ty = 200 + Math.sin(angle)*r; }
+                        targetColor = "#2ecc71";
                     }
-                    // 2. 猫耳朵 (Mimic)
                     else if (this.state === "cat_ears") {
-                        if (i < 60) { // 左耳
-                            tx = 150 - (i%20)*2; ty = 140 - (i%20)*3;
-                        } else if (i < 120) { // 右耳
-                            tx = 250 + (i%20)*2; ty = 140 - (i%20)*3;
-                        } else {
-                            const angle = i; const r = 65;
-                            tx = 200 + Math.cos(angle)*r; ty = 210 + Math.sin(angle)*r;
-                        }
+                        if (i < 60) { tx = 150 - (i%20)*2; ty = 140 - (i%20)*3; }
+                        else if (i < 120) { tx = 250 + (i%20)*2; ty = 140 - (i%20)*3; }
+                        else { const angle = i; const r = 65; tx = 200 + Math.cos(angle)*r; ty = 210 + Math.sin(angle)*r; }
                         targetColor = "#ffb8b8";
                     }
-                    // 3. 时钟 (Clock)
                     else if (this.state === "clock") {
                         const r = 90; tx = 200 + Math.cos(i) * r; ty = 200 + Math.sin(i) * r;
-                        if (i < 20) { tx = 200; ty = 200 - i*3; targetColor="white";} // 针
+                        if (i < 20) { tx = 200; ty = 200 - i*3; targetColor="white";}
                         if (i > 20 && i < 50) { tx = 200 + (i-20)*3; ty = 200; targetColor="white";}
                     }
-                    // 4. 爆炸 (Explode)
                     else if (this.state === "explode") {
                         tx = 200 + (Math.random()-0.5)*800; ty = 200 + (Math.random()-0.5)*800;
                         loose = false; speedOverride = 0.5; targetColor = "#ff3838";
                     }
-                    // 5. 文档 (Doc Mode)
                     else if (this.state === "doc_mode") {
                         const cols = 20; const row = Math.floor(i / cols); const col = i % cols;
-                        tx = 130 + col * 7; ty = 130 + row * 7;
-                        loose = false; targetColor = "#ffffff";
+                        tx = 130 + col * 7; ty = 130 + row * 7; loose = false; targetColor = "#ffffff";
                     }
-                    // 6. 蹦迪 (Disco)
                     else if (this.state === "disco") {
                         const hue = (this.time * 100) % 360; targetColor = `hsl(${hue}, 100%, 50%)`;
                         const beat = Math.sin(this.time * 10); const r = 70 + (beat > 0.5 ? 30 : 0);
                         tx = 200 + Math.cos(i + this.time)*r; ty = 200 + Math.sin(i + this.time)*r;
                     }
-                    // 7. 二维化 (Scatter Flat)
                     else if (this.state === "scatter_flat") {
-                        tx = (i / CONFIG.particleCount) * 400; ty = 200 + Math.sin(tx/20 + this.time)*20;
-                        loose = false;
+                        tx = (i / CONFIG.particleCount) * 400; ty = 200 + Math.sin(tx/20 + this.time)*20; loose = false;
                     }
-                    // 8. 消失 (Dissolve)
                     else if (this.state === "dissolve") {
                         if (i % 2 === 0) { tx = p.x + Math.random()*2; ty = p.y - Math.random()*2; }
                         else { const angle = i; const r = 60; tx = 200 + Math.cos(angle)*r; ty = 200 + Math.sin(angle)*r; }
                         loose = false; targetColor = `rgba(255,255,255, ${Math.random()})`;
                     }
-                    // 9. 抛硬币 (Coin Flip - 模拟旋转)
                     else if (this.state === "coin_flip") {
-                        const r = 60;
-                        // 模拟 Y 轴旋转，压扁 x 轴
-                        const scale = Math.cos(this.time * 10);
-                        tx = 200 + Math.cos(i) * r * scale; 
-                        ty = 200 + Math.sin(i) * r;
-                        targetColor = "#f1c40f";
+                        const r = 60; const scale = Math.cos(this.time * 10);
+                        tx = 200 + Math.cos(i) * r * scale; ty = 200 + Math.sin(i) * r; targetColor = "#f1c40f";
                     }
-                    // 10. 形状变换 (Morph - 用于猜拳/随机)
                     else if (this.state === "morph_shape") {
-                        const r = 50 + Math.sin(this.time * 5) * 20; // 忽大忽小
-                        const angle = i + this.time;
-                        tx = 200 + Math.cos(angle * 3) * r; // 三角形/不规则
-                        ty = 200 + Math.sin(angle) * r;
-                        targetColor = `hsl(${i % 360}, 70%, 60%)`;
+                        const r = 50 + Math.sin(this.time * 5) * 20; const angle = i + this.time;
+                        tx = 200 + Math.cos(angle * 3) * r; ty = 200 + Math.sin(angle) * r; targetColor = `hsl(${i % 360}, 70%, 60%)`;
                     }
-                    // 11. 流动 (Flow)
                     else if (this.state === "flow") {
-                        tx = (i / CONFIG.particleCount) * 400;
-                        ty = 200 + Math.sin(tx/50 + this.time) * 50;
-                        targetColor = "#00d2ff";
+                        tx = (i / CONFIG.particleCount) * 400; ty = 200 + Math.sin(tx/50 + this.time) * 50; targetColor = "#00d2ff";
                     }
-                    // 12. 攻击 (Attack)
                     else if (this.state === "attack") {
                         const angle = i; const r = 70 + (i%5)*10;
                         tx = 200 + Math.cos(angle)*r; ty = 200 + Math.sin(angle)*r;
                         targetColor = "#e74c3c"; loose = false; tx += (Math.random()-0.5)*10; ty += (Math.random()-0.5)*10;
                     }
-                    // 13. 爱心 (Heart)
-                    else if (this.state === "heart") {
+                    else if (this.state === "heart" || this.state === "shy" || this.state === "shy_spin") {
                         const t = (i/CONFIG.particleCount)*Math.PI*2; const r = 8;
                         tx = 200 + r*(16*Math.pow(Math.sin(t),3));
                         ty = 190 - r*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
-                        targetColor = "#e91e63"; loose = false;
+                        targetColor = this.state.includes("shy") ? "#ff9ff3" : "#e91e63"; loose = false;
+                        if(this.state === "shy_spin") { 
+                             const rot = this.time * 3; const oldTx = tx - 200; const oldTy = ty - 190;
+                             tx = 200 + (oldTx * Math.cos(rot) - oldTy * Math.sin(rot));
+                             ty = 190 + (oldTx * Math.sin(rot) + oldTy * Math.cos(rot));
+                        }
                     }
-                    // 14. 宇宙 (Universe)
-                    else if (this.state === "universe") {
-                        const angle = i * 0.1 + this.time * 0.5; const r = i * 0.4;
-                        tx = 200 + Math.cos(angle) * r; ty = 200 + Math.sin(angle) * r;
-                        targetColor = "#8e44ad";
+                    else if (this.state === "glitch") {
+                        tx = Math.random() * 400; ty = Math.random() * 400; loose = false; if(Math.random()>0.8) targetColor = "#fff";
                     }
-                    // 15. 通用状态 (Freeze, Sleep, Dark, Gold, Expand, Shiver, Glitch)
                     else if (this.state === "freeze") { tx = p.x; ty = p.y; speedOverride=0; targetColor="#95a5a6"; }
                     else if (this.state === "sleep") { tx=200+(i-CONFIG.particleCount/2); ty=300; speedOverride=0.05; targetColor="#7f8c8d"; }
                     else if (this.state === "dark_mode") { const angle=i; const r=50; tx=200+Math.cos(angle)*r; ty=200+Math.sin(angle)*r; targetColor="#333333"; }
                     else if (this.state === "gold_mode") { const angle=i; const r=80; tx=200+Math.cos(angle)*r; ty=200+Math.sin(angle)*r; targetColor="#ffd700"; }
                     else if (this.state === "expand") { const angle=i; const r=180; tx=200+Math.cos(angle)*r; ty=200+Math.sin(angle)*r; targetColor="#8e44ad"; }
                     else if (this.state === "shiver") { const angle=i; const r=40; tx=200+Math.cos(angle)*r+(Math.random()-0.5)*15; ty=200+Math.sin(angle)*r+(Math.random()-0.5)*15; targetColor="#bdc3c7"; loose=false; }
-                    else if (this.state === "glitch") { tx=Math.random()*400; ty=Math.random()*400; loose=false; if(Math.random()>0.8) targetColor="#fff"; }
-                    else if (this.state === "shy" || this.state === "shy_spin") { 
-                        // 害羞/旋转
-                        const angle = i + (this.state==="shy_spin"?this.time*3:0); const r = 80;
-                        tx = 200 + Math.cos(angle) * r; ty = 200 + Math.sin(angle) * r;
-                        targetColor = "#ff9ff3"; loose = false;
-                    }
                     else if (this.state === "stand_proud" || this.state === "stand_serious") {
-                         // 站立/傲慢 - 保持原有，也可以改为叉腰
-                         if(i<60){ tx=175; ty=290+(i%15)*4; }
-                         else if(i<120){ tx=225; ty=290+(i%15)*4; }
-                         else { tx=200+Math.cos(i)*65; ty=190+Math.sin(i)*65; }
+                         if(i<60){ tx=175; ty=290+(i%15)*4; } else if(i<120){ tx=225; ty=290+(i%15)*4; } else { tx=200+Math.cos(i)*65; ty=190+Math.sin(i)*65; }
                          targetColor = this.state === "stand_proud" ? "#9b59b6" : "#34495e";
                     }
-                    else if (this.state === "scatter_recycle") { // 垃圾清理
-                         tx = 200 + (Math.random()-0.5)*100; ty = 400; // 掉下去
-                    }
-                    else if (this.state === "comfort") { // 靠近
-                         const angle = i; const r = 120; // 变大靠近
-                         tx = 200 + Math.cos(angle)*r; ty = 200 + Math.sin(angle)*r;
-                         targetColor = "#fab1a0";
-                    }
-                    else if (this.state === "thinking") { // 思考
-                         const angle = i + this.time*2; const r = 40;
-                         tx = 200 + Math.cos(angle)*r; ty = 200 + Math.sin(angle)*r;
-                         targetColor = "#0984e3";
-                    }
-                    else { // Fallback
-                        const angle = i; const r = 70; tx = 200 + Math.cos(angle)*r; ty = 200 + Math.sin(angle)*r;
-                    }
+                    else if (this.state === "scatter_recycle") { tx = 200 + (Math.random()-0.5)*100; ty = 400; }
+                    else if (this.state === "comfort") { const angle=i; const r=120; tx=200+Math.cos(angle)*r; ty=200+Math.sin(angle)*r; targetColor="#fab1a0"; }
+                    else if (this.state === "thinking") { const angle=i+this.time*2; const r=40; tx=200+Math.cos(angle)*r; ty=200+Math.sin(angle)*r; targetColor="#0984e3"; }
+                    else if (this.state === "universe") { const angle=i*0.1+this.time*0.5; const r=i*0.4; tx=200+Math.cos(angle)*r; ty=200+Math.sin(angle)*r; targetColor="#8e44ad"; }
+                    else { const angle = i; const r = 70; tx = 200 + Math.cos(angle)*r; ty = 200 + Math.sin(angle)*r; }
 
-                    // --- 物理应用 ---
                     const dx_m = p.x - this.mouseX; const dy_m = p.y - this.mouseY;
                     const dist_m = Math.sqrt(dx_m*dx_m + dy_m*dy_m);
                     if (dist_m < 80) {
@@ -355,18 +293,15 @@
                 this.bubble = document.getElementById('chat-bubble');
                 this.bubbleTimer = null;
                 this.loopTimer = null;
+                this.synth = window.speechSynthesis;
             }
 
             think(text) {
                 const cleanText = text.toLowerCase().trim();
                 
-                // 0. 终极彩蛋
                 if (cleanText.includes("什么意思")) { this.triggerInfiniteLoop(); return; }
-
-                // 1. 时间逻辑
                 if (this.checkTimeLogic(cleanText)) return;
 
-                // 2. 剧本匹配
                 const scenario = CONFIG.scenarios.find(s => s.keywords.some(k => cleanText.includes(k)));
                 if (scenario) {
                     this.execute(scenario);
@@ -396,42 +331,44 @@
 
             execute(scenario) {
                 let replyText = "";
-                
-                // --- 特殊逻辑处理 ---
                 if (scenario.id === "rps") {
                     const opts = ["石头", "剪刀", "布"];
-                    const res = opts[Math.floor(Math.random()*3)];
-                    replyText = `我出 ${res}！\n(粒子变成了形状)... 哈哈，谁赢了？`;
-                }
-                else if (scenario.id === "coin") {
-                    const res = Math.random() > 0.5 ? "正面" : "反面";
-                    replyText = `结果是... ${res}。\n别问我有没有作弊，那是物理引擎决定的。`;
-                }
-                else if (scenario.id === "choice") {
-                    const res = Math.random() > 0.5 ? "前一项" : "后一项";
-                    replyText = `经过 0.01 秒的严密计算，我建议选 ${res}。\n听我的没错。`;
-                }
-                else {
+                    replyText = `我出 ${opts[Math.floor(Math.random()*3)]}！\n哈哈，输了别哭。`;
+                } else if (scenario.id === "coin") {
+                    replyText = `结果是... ${Math.random() > 0.5 ? "正面" : "反面"}。`;
+                } else if (scenario.id === "choice") {
+                    replyText = `经过计算，我建议选 ${Math.random() > 0.5 ? "前一个" : "后一个"}。`;
+                } else {
                     replyText = scenario.replies[Math.floor(Math.random() * scenario.replies.length)];
                 }
 
                 this.speak(replyText, scenario.action);
-                
-                // 自动复原状态
                 if (scenario.id === "explode") setTimeout(() => this.visual.setState("idle"), 4000);
             }
 
             speak(text, visualState) {
                 if (this.loopTimer) { clearInterval(this.loopTimer); this.loopTimer = null; }
+                
+                // 1. 切换视觉
                 this.visual.setState(visualState);
+                
+                // 2. 显示文字
                 if (this.bubbleTimer) clearTimeout(this.bubbleTimer);
+                this.bubble.innerText = text; 
+                this.bubble.classList.add('visible');
                 
-                this.bubble.innerText = text; this.bubble.classList.add('visible');
+                // 3. 语音合成 (Web Speech API)
+                if (this.synth) {
+                    this.synth.cancel(); // 打断之前的说话
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'zh-CN'; 
+                    utterance.rate = 1.0; 
+                    this.synth.speak(utterance);
+                }
+
                 const duration = Math.max(3000, text.length * 200);
-                
                 this.bubbleTimer = setTimeout(() => {
                     this.bubble.classList.remove('visible');
-                    // 大部分状态恢复，除了持久状态
                     if (!["doc_mode", "sleep", "dark_mode"].includes(visualState)) {
                         this.visual.setState("idle");
                     }
@@ -444,8 +381,12 @@
                 this.loopTimer = setInterval(() => {
                     count++;
                     const variants = ["什么意思？", "什么意思！", "意思什么？", "啊？？"];
-                    this.bubble.innerText = variants[count % 4] + "\n".repeat(count % 3) + variants[(count+1)%4];
+                    const txt = variants[count % 4] + "\n".repeat(count % 3) + variants[(count+1)%4];
+                    this.bubble.innerText = txt; 
                     this.bubble.classList.add("visible");
+                    
+                    // 鬼畜时不要朗读，太吵了
+                    
                     if (count > 25) {
                         clearInterval(this.loopTimer); this.loopTimer = null;
                         this.speak("嘣！！！！！\n(CPU过载)", "explode");
@@ -475,7 +416,7 @@
             recognition.onresult = (event) => { brain.think(event.results[0][0].transcript); };
             micBtn.onclick = () => { try { recognition.start(); } catch(e) { recognition.stop(); } };
         } else {
-            statusText.innerText = "浏览器不支持语音"; micBtn.style.display = "none";
+            statusText.innerText = "您的浏览器不支持语音功能"; micBtn.style.display = "none";
         }
     </script>
 </body>
