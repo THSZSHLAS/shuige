@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>蓝山人 - 配置化版</title>
     <style>
-        /* --- 样式部分保持不变，为了节省篇幅，这里直接沿用之前的精美样式 --- */
+        /* --- 样式部分 --- */
         body { margin: 0; padding: 0; background-color: #050505; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; overflow: hidden; color: white; user-select: none; }
         #canvas-container { position: relative; width: 400px; height: 400px; background: radial-gradient(circle, rgba(64, 150, 255, 0.05) 0%, transparent 70%); cursor: pointer; }
         #chat-bubble { position: absolute; top: -20px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 20px; font-size: 15px; line-height: 1.4; color: #333; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4); font-weight: bold; text-align: center; white-space: pre-wrap; z-index: 10; width: 260px; }
@@ -36,11 +36,6 @@
         // ==========================================
         //         1. 剧本配置区 (在此添加新指令)
         // ==========================================
-        
-        // 格式说明：
-        // keywords: 只要包含这些词，就会触发
-        // state: 触发什么动作 (可选: idle, stand, shy, defend, confused, heart, sleep, attack, expand, shiver, freeze, glitch, doc, scatter)
-        // replies: 随机回复的内容列表
         
         const SCENARIOS = [
             {
@@ -128,8 +123,8 @@
                 state: "stand",
                 replies: ["你好，我是蓝山人。有何贵干？"]
             },
-            // ---> 你可以在这里复制粘贴增加新的 <---
-           {
+            // ---> 你新增的指令 <---
+            {
                 keywords: ["熊", "猴"],
                 state: "glitch",
                 replies: ["我是熊，金！U ！熊！！！！"]
@@ -143,20 +138,17 @@
                 keywords: ["西"],
                 state: "freeze",
                 replies: ["啊？二连桶啊？"]
-            },
+            }
         ];
-       // {
-       //          keywords: [""],
-       //          state: "",
-       //          replies: [""]
-       //      },
+
         // 默认回复库 (当听不懂时)
+        // 注意：这里已经修复了中文逗号的问题
         const DEFAULT_REPLIES = [
             "你说啥？信号不好。",
             "这超出了我的认知范围。",
             "建议去修一下麦克风，或者是嘴。",
-            "我不听我不听。"，
-            "讲些什么 我的数据库还没存怎么回这种屁话"
+            "我不听我不听。", 
+            "讲些什么？我的数据库还没存怎么回这种屁话"
         ];
 
         // ==========================================
@@ -202,7 +194,7 @@
             }
         }
 
-        // --- 粒子系统与动画 (保持原样) ---
+        // --- 粒子系统与动画 ---
         class Particle {
             constructor() {
                 this.x = 200 + (Math.random()-0.5)*50;
