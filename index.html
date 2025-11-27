@@ -60,7 +60,7 @@
         const CONFIG = {
             particleCount: 380,
             defaultColor: 'rgba(79, 172, 254, 0.8)',
-            fallbackReplies: ["数据库未命中。", "再说一遍？", "听不懂，给你表演个劈叉。"],
+            fallbackReplies: ["数据库没写，要不就是你有口音。", "再说一遍？", "听不懂啊，港普通画。"],
             
             // 时间回复配置
             timeResponses: {
@@ -78,20 +78,22 @@
                 { id: "cmd_sit", keywords: ["坐", "坐下"], action: "sleep", replies: ["隔这训狗呢 你他妈的"] },
                 { id: "cmd_name", keywords: ["蓝山人"], action: "stand_proud", replies: ["我要撞死你"] },
                 // 1. 动作类
-                { id: "wave", keywords: ["挥手", "招手", "拜拜"], action: "wave_hand", replies: ["(挥动粒子手臂) 嗨！看到我了吗？"] },
-                { id: "jump", keywords: ["跳", "起飞", "蹦"], action: "jump_ball", replies: ["芜湖！起飞！"] },
+                { id: "wave", keywords: ["挥手", "招手", "拜拜"], action: "wave_hand", replies: [" 嗨！看得到吗 呆瓜？"] },
+                { id: "jump", keywords: ["跳", "起飞", "蹦"], action: "jump_ball", replies: ["我直接上下弹，找个机会撞死你"] },
                 { id: "salute", keywords: ["敬礼", "收到", "yes sir"], action: "salute", replies: ["Yes Sir! 保证完成任务！"] },
-                { id: "wake", keywords: ["睁开眼", "睁眼", "醒醒"], action: "open_eyes", replies: ["👀 早就醒啦！"] },
+                { id: "wake", keywords: ["睁开眼", "睁眼", "醒醒"], action: "open_eyes", replies: ["老子就没睡！"] },
                 // 2. 私人定制
                 { id: "bear", keywords: ["熊", "猴"], action: "glitch", replies: ["我是蓝山boy，我是！金！U ！熊！！！！"] },
                 { id: "story", keywords: ["黑", "鬼"], action: "expand", replies: ["要讲故事咯！"] },
                 { id: "xi", keywords: ["西", "阿西"], action: "freeze", replies: ["嘻嘻嘻嘻嘻嘿黑黑，自行脑补。"] },
-                { id: "gao", keywords: ["高", "老高"], action: "shy", replies: ["喂！小心炮车，怕你漏了我帮你吃一下哟。"] },
+                { id: "gao", keywords: ["高", "老高"], action: "shy", replies: ["喂！小心炮车，怕你漏了我帮你吃一下哟。（男娘音）"] },
                 { id: "yong", keywords: ["雍", "用", "勇", "永"], action: "glitch", replies: ["想到都来气，我直接就是特斯拉猛击！"] },
+                 { id: "salute", keywords: ["智","开发者"], action: "salute", replies: ["化神期大能，也是尔等凡人可以直呼其名讳？大胆"] },
+                
                 // 3. 通用指令
                 { id: "explode", keywords: ["自爆", "毁灭", "爆炸"], action: "explode", replies: ["倒计时 3, 2, 1... 砰！！！"] },
-                { id: "mock_body", keywords: ["没有腿", "没有手"], action: "arms_open", replies: ["谁说没有？！看！这是什么？！"] },
-                { id: "energy", keywords: ["饿", "吃饭", "没电"], action: "expand", replies: ["人类吃大米，我吃电子。"] },
+                { id: "mock_body", keywords: ["没有腿", "没有手"], action: "arms_open", replies: ["谁说没有？！瞎了眼？！"] },
+                { id: "energy", keywords: ["饿", "吃饭", "没电"], action: "expand", replies: ["人类吃大米，我吃特斯拉。"] },
                 { id: "heat", keywords: ["热", "烫", "降温"], action: "shy_spin", replies: ["我都要热融化了。"] },
                 { id: "bug", keywords: ["坏了", "报错", "bug"], action: "glitch", replies: ["这不是 Bug，这是 Feature。"] },
                 { id: "disco", keywords: ["哈哈", "嘿嘿", "好耶"], action: "disco", replies: ["独乐乐不如众乐乐，嗨起来！"] },
