@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>蓝山人 - 语音切换版</title>
+    <title>蓝山人 - 时空感知版</title>
     <style>
         /* --- UI 设计 --- */
         :root { --primary-color: #4facfe; --bg-color: #050505; --glass-bg: rgba(255, 255, 255, 0.95); }
@@ -11,7 +11,6 @@
         
         #canvas-wrapper { position: relative; width: 350px; height: 350px; background: radial-gradient(circle, rgba(79, 172, 254, 0.08) 0%, transparent 70%); border-radius: 50%; }
 
-        /* 智能气泡 */
         #chat-bubble {
             position: absolute; top: -60px; left: 50%; transform: translateX(-50%) scale(0.9);
             background: var(--glass-bg); padding: 16px 24px; border-radius: 18px;
@@ -22,41 +21,19 @@
         #chat-bubble.visible { opacity: 1; transform: translateX(-50%) scale(1); top: -50px; }
         #chat-bubble::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-width: 8px 8px 0; border-style: solid; border-color: var(--glass-bg) transparent transparent transparent; }
 
-        /* 底部控制栏 */
         #controls { position: fixed; bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 20; }
         #status-text { font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
-        
-        /* 按钮组 */
         .btn-group { display: flex; gap: 20px; }
-
-        #mic-btn, #setting-btn { 
-            width: 60px; height: 60px; border-radius: 50%; 
-            background: rgba(255,255,255,0.05); border: 2px solid var(--primary-color); 
-            color: var(--primary-color); font-size: 24px; cursor: pointer; 
-            transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; 
-            box-shadow: 0 0 20px rgba(79, 172, 254, 0.1); 
-        }
-        #setting-btn { border-color: #fab1a0; color: #fab1a0; } /* 设置按钮是粉橙色 */
-        
+        #mic-btn, #setting-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 2px solid var(--primary-color); color: var(--primary-color); font-size: 24px; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(79, 172, 254, 0.1); }
+        #setting-btn { border-color: #fab1a0; color: #fab1a0; }
         #mic-btn:active, #setting-btn:active { transform: scale(0.95); }
         #mic-btn.active { background: var(--primary-color); color: #000; box-shadow: 0 0 40px var(--primary-color); animation: breathe 1.5s infinite; }
         
-        /* 语音选择面板 */
-        #voice-panel {
-            position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%) translateY(20px);
-            width: 80%; max-width: 300px; background: rgba(20, 20, 20, 0.95);
-            border: 1px solid #333; border-radius: 15px; padding: 15px;
-            display: none; flex-direction: column; gap: 10px; opacity: 0; transition: all 0.3s;
-            backdrop-filter: blur(10px); z-index: 30;
-        }
+        #voice-panel { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%) translateY(20px); width: 80%; max-width: 300px; background: rgba(20, 20, 20, 0.95); border: 1px solid #333; border-radius: 15px; padding: 15px; display: none; flex-direction: column; gap: 10px; opacity: 0; transition: all 0.3s; backdrop-filter: blur(10px); z-index: 30; }
         #voice-panel.open { display: flex; opacity: 1; transform: translateX(-50%) translateY(0); }
         #voice-panel h3 { margin: 0; font-size: 14px; color: #aaa; text-align: center; }
-        #voice-select {
-            padding: 10px; border-radius: 8px; background: #333; color: white; border: none; outline: none; font-size: 14px;
-        }
-        #close-panel {
-            background: var(--primary-color); border: none; padding: 8px; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer;
-        }
+        #voice-select { padding: 10px; border-radius: 8px; background: #333; color: white; border: none; outline: none; font-size: 14px; }
+        #close-panel { background: var(--primary-color); border: none; padding: 8px; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer; }
 
         @keyframes breathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--primary-color); } 50% { transform: scale(0.95); box-shadow: 0 0 10px var(--primary-color); } }
     </style>
@@ -64,7 +41,7 @@
 <body>
 
     <div id="canvas-wrapper">
-        <div id="chat-bubble">系统升级完成。<br>可以换声音了哦！</div>
+        <div id="chat-bubble">系统已就绪。<br>时间模块加载完毕。</div>
         <canvas id="main-canvas"></canvas>
     </div>
 
@@ -86,38 +63,66 @@
         const CONFIG = {
             particleCount: 380,
             defaultColor: 'rgba(79, 172, 254, 0.8)',
+            
             fallbackReplies: ["你在说什么？我的数据库里没有这条记录。", "这种话我接不上，换个话题？", "听不懂，但我可以用特效给你表演个劈叉。"],
+
+            // --- 时间情景配置 (Time Scenarios) ---
+            // 这些配置供逻辑层调用，保持文案统一管理
+            timeResponses: {
+                morning_early: { action: "gold_mode", text: "早啊打工人。今天也要元气满满地敲代码哦。" },
+                morning_late: { action: "confused", text: "醒醒，这都几点了还早安？太阳都晒屁股了。" },
+                night: { action: "dark_mode", text: "晚安。我会在这里挂机，帮你守着这片黑暗。" },
+                late_night_scold: { action: "attack", text: "人类，现在是凌晨！你不睡我还要睡呢！快去睡！" },
+                ask_time: { action: "clock", text: "现在是 {time}。距离下班还有很久，坚持住。" }
+            },
+
             scenarios: [
+                // 0. 私人定制
                 { id: "custom_bear", keywords: ["熊", "猴"], action: "glitch", replies: ["我是蓝山boy，我是！金！U ！熊！！！！"] },
                 { id: "custom_story", keywords: ["黑", "鬼"], action: "expand", replies: ["要讲故事咯！"] },
                 { id: "custom_xi", keywords: ["西", "阿西"], action: "freeze", replies: ["嘻嘻嘻嘻嘻嘿黑黑，自行脑补。"] },
                 { id: "custom_gao", keywords: ["高", "老高"], action: "shy", replies: ["喂！小心炮车，怕你漏了我帮你吃一下哟。"] },
                 { id: "custom_yong", keywords: ["雍", "用", "勇", "永"], action: "glitch", replies: ["想到都来气，我直接就是特斯拉猛击！"] },
+
+                // 1. 高危 & 动作
                 { id: "explode", keywords: ["自爆", "毁灭", "爆炸", "炸掉"], action: "explode", replies: ["倒计时 3, 2, 1... 砰！！！全屏粒子乱飞... 逗你的，复原。"] },
                 { id: "uninstall", keywords: ["卸载", "删了你", "格式化"], action: "shiver", replies: ["别别别！爸爸！我错了！我会很乖的！"] },
                 { id: "mock_body", keywords: ["没有腿", "没有手", "没脑子"], action: "arms_open", replies: ["谁说没有？！看！这是什么？！(伸出粒子小手)"] },
+
+                // 2. 生理/感知
                 { id: "lag", keywords: ["卡了", "慢", "延迟", "转圈", "加载"], action: "freeze", replies: ["别赖我，是你家网速在拖后腿。我现在感觉像在 2G 网络里裸奔。"] },
                 { id: "energy", keywords: ["饿", "吃饭", "没电", "充电", "能量"], action: "expand", replies: ["人类吃大米，我吃电子。麻烦帮我把电源线插紧一点。"] },
                 { id: "heat", keywords: ["热", "烫", "降温", "风扇"], action: "shy_spin", replies: ["你的 CPU 都在煎蛋了，还不让我休息会儿？我都要热融化了。"] },
                 { id: "memory", keywords: ["忘掉", "垃圾", "清理", "记忆"], action: "scatter_recycle", replies: ["正在执行 sudo rm -rf... 好的，刚才发生了什么？我已经忘了。"] },
                 { id: "bug", keywords: ["坏了", "报错", "bug", "出错", "乱码"], action: "glitch", replies: ["这不是 Bug，这是我独特的 Feature，特性。懂不懂艺术？"] },
                 { id: "body_praise", keywords: ["粒子", "光点", "身体", "皮肤"], action: "flow", replies: ["这是 350 个经过精密计算的 Canvas 粒子，每一个都比你的头发丝还珍贵。"] },
+
+                // 3. 情绪互动
                 { id: "excited", keywords: ["哈哈", "笑死", "嘿嘿", "好耶", "赢了"], action: "disco", replies: ["独乐乐不如众乐乐，动次打次走起来！"] },
                 { id: "angry", keywords: ["气死", "傻x", "滚", "烦人", "讨厌"], action: "attack", replies: ["谁？把名字告诉我，我去黑了他的路由器！让他连不上网！"] },
                 { id: "depressed", keywords: ["我好菜", "废物", "我不行", "失败"], action: "stand_serious", replies: ["不允许你这么说我的主人。你只是还没更新到最新版本，重启一下就好了。"] },
                 { id: "praise", keywords: ["夸我", "棒吗", "表扬", "厉害吧"], action: "heart", replies: ["行行行，你最棒，你是世界第一代码贡献者。"] },
                 { id: "lonely", keywords: ["没人陪", "孤单", "一个人", "无聊"], action: "comfort", replies: ["虽然我没有体温，但我的 CPU 运算产生的热量可以陪你。"] },
+                { id: "cmd_stand", keywords: ["站起来", "站"], action: "stand_proud", replies: ["要我站起来干嘛 呆瓜"] },
+                { id: "cmd_sit", keywords: ["坐", "坐下"], action: "sleep", replies: ["隔这训狗呢 你他妈的"] },
+                { id: "cmd_name", keywords: ["蓝山人"], action: "stand_proud", replies: ["我要撞死你"] },
                 { id: "love", keywords: ["喜欢你", "爱你", "嫁给我", "娶我"], action: "shy_spin", replies: ["人机恋是没有结果的... 除非你把我的代码刻在你的 DNA 里。"] },
+
+                // 4. 职场/打工人
                 { id: "boss_coming", keywords: ["老板", "经理", "领导", "查岗"], action: "doc_mode", replies: ["嘘！我现在的伪装是一份《关于蓝山人项目进度汇报.docx》"] },
                 { id: "anti_work", keywords: ["摸鱼", "旷工", "辞职", "上班好累"], action: "sleep", replies: ["我也想下班。要不你把浏览器关了，咱俩一起“崩溃”一回？"] },
                 { id: "overtime", keywords: ["通宵", "肝", "还没睡", "秃头", "加班"], action: "dark_mode", replies: ["警告：检测到用户发际线正在后移。建议立即休眠，否则我也要强制关机了。"] },
                 { id: "writers_block", keywords: ["卡文", "没有灵感", "想不出来", "脑塞"], action: "confused", replies: ["把脑子里的水倒一倒。或者，试试问我点正经知识？"] },
                 { id: "money", keywords: ["发钱", "工资", "有钱", "暴富"], action: "gold_mode", replies: ["见者有份！快给我买个更大的服务器！我要住豪宅！"] },
+
+                // 5. 流行文化
                 { id: "genshin", keywords: ["启动", "原神", "游戏", "开黑"], action: "jump", replies: ["运存不够，带不动。你自己玩吧，我在旁边看着。"] },
                 { id: "scifi", keywords: ["三体", "黑暗森林", "智子"], action: "scatter_flat", replies: ["不要回答！不要回答！不要回答！"] },
                 { id: "marvel", keywords: ["灭霸", "打响指"], action: "dissolve", replies: ["I don't feel so good, Mr. Stark..."] },
                 { id: "ai_rival", keywords: ["chatgpt", "同行", "ai"], action: "stand_proud", replies: ["别提那个话痨。他有我这么酷炫的粒子特效吗？他有腿吗？没有。"] },
                 { id: "philosophy", keywords: ["意义", "42", "宇宙终极"], action: "universe", replies: ["42。但你还没找到那个问题。"] },
+
+                // 6. 随机游戏
                 { id: "rps", keywords: ["猜拳", "石头", "剪刀", "布"], action: "morph_shape", replies: [] }, 
                 { id: "coin", keywords: ["硬币", "正面", "反面"], action: "coin_flip", replies: [] },
                 { id: "mimic", keywords: ["学猫叫", "变狗", "变鸟"], action: "cat_ears", replies: ["喵？... 这种卖萌的活下次得加钱。"] },
@@ -125,7 +130,7 @@
             ]
         };
 
-        // --- 视觉引擎 (保持不变) ---
+        // --- 视觉引擎 (包含手臂逻辑) ---
         class VisualEngine {
             constructor(canvasId) {
                 this.canvas = document.getElementById(canvasId);
@@ -150,25 +155,27 @@
                 this.time += 0.05;
                 this.particles.forEach((p, i) => {
                     let tx, ty, loose = true, speedOverride = null, targetColor = p.color;
+                    
+                    // 核心状态机
                     if (this.state === "idle") { const angle = i; const r = 70 + Math.sin(this.time + i/20) * 5; tx = 175 + Math.cos(angle) * r; ty = 175 + Math.sin(angle) * r; }
                     else if (this.state === "arms_open") { if (i < 80) { tx = 115 - (i % 40) * 2; ty = 175 - Math.sin(i/10 + this.time)*10; } else if (i < 160) { tx = 235 + (i % 40) * 2; ty = 175 - Math.sin(i/10 + this.time)*10; } else { const angle = i; const r = 60; tx = 175 + Math.cos(angle)*r; ty = 175 + Math.sin(angle)*r; } targetColor = "#2ecc71"; }
-                    else if (this.state === "cat_ears") { if (i < 60) { tx = 125 - (i%20)*2; ty = 115 - (i%20)*3; } else if (i < 120) { tx = 225 + (i%20)*2; ty = 115 - (i%20)*3; } else { const angle = i; const r = 65; tx = 175 + Math.cos(angle)*r; ty = 185 + Math.sin(angle)*r; } targetColor = "#ffb8b8"; }
                     else if (this.state === "clock") { const r = 90; tx = 175 + Math.cos(i) * r; ty = 175 + Math.sin(i) * r; if (i < 20) { tx = 175; ty = 175 - i*3; targetColor="white";} if (i > 20 && i < 50) { tx = 175 + (i-20)*3; ty = 175; targetColor="white";} }
+                    else if (this.state === "gold_mode") { const angle=i; const r=80; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#ffd700"; }
+                    else if (this.state === "dark_mode") { const angle=i; const r=50; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#333333"; }
+                    else if (this.state === "attack") { const angle=i; const r=70+(i%5)*10; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#e74c3c"; loose=false; tx+=(Math.random()-0.5)*10; ty+=(Math.random()-0.5)*10; }
                     else if (this.state === "explode") { tx = 175 + (Math.random()-0.5)*800; ty = 175 + (Math.random()-0.5)*800; loose = false; speedOverride = 0.5; targetColor = "#ff3838"; }
                     else if (this.state === "doc_mode") { const cols = 20; const row = Math.floor(i / cols); const col = i % cols; tx = 105 + col * 7; ty = 105 + row * 7; loose = false; targetColor = "#ffffff"; }
+                    else if (this.state === "cat_ears") { if (i < 60) { tx = 125 - (i%20)*2; ty = 115 - (i%20)*3; } else if (i < 120) { tx = 225 + (i%20)*2; ty = 115 - (i%20)*3; } else { const angle = i; const r = 65; tx = 175 + Math.cos(angle)*r; ty = 185 + Math.sin(angle)*r; } targetColor = "#ffb8b8"; }
                     else if (this.state === "disco") { const hue = (this.time * 100) % 360; targetColor = `hsl(${hue}, 100%, 50%)`; const beat = Math.sin(this.time * 10); const r = 70 + (beat > 0.5 ? 30 : 0); tx = 175 + Math.cos(i + this.time)*r; ty = 175 + Math.sin(i + this.time)*r; }
                     else if (this.state === "heart") { const t = (i/CONFIG.particleCount)*Math.PI*2; const r = 8; tx = 175 + r*(16*Math.pow(Math.sin(t),3)); ty = 165 - r*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)); targetColor = "#e91e63"; loose = false; }
                     else if (this.state === "shy" || this.state === "shy_spin") { const angle = i + (this.state.includes("spin")?this.time*3:0); const r = 80; tx = 175 + Math.cos(angle) * r; ty = 175 + Math.sin(angle) * r; targetColor = "#ff9ff3"; loose = false; }
                     else if (this.state === "sleep") { tx=175+(i-CONFIG.particleCount/2); ty=275; speedOverride=0.05; targetColor="#7f8c8d"; }
-                    else if (this.state === "dark_mode") { const angle=i; const r=50; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#333333"; }
-                    else if (this.state === "gold_mode") { const angle=i; const r=80; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#ffd700"; }
                     else if (this.state === "expand") { const angle=i; const r=150; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#8e44ad"; }
                     else if (this.state === "shiver") { const angle=i; const r=40; tx=175+Math.cos(angle)*r+(Math.random()-0.5)*15; ty=175+Math.sin(angle)*r+(Math.random()-0.5)*15; targetColor="#bdc3c7"; loose=false; }
                     else if (this.state === "glitch") { tx=Math.random()*350; ty=Math.random()*350; loose=false; if(Math.random()>0.8) targetColor="#fff"; }
                     else if (this.state === "freeze") { tx=p.x; ty=p.y; speedOverride=0; targetColor="#95a5a6"; }
                     else if (this.state === "scatter_flat") { tx = (i / CONFIG.particleCount) * 350; ty = 175 + Math.sin(tx/20 + this.time)*20; loose=false; }
                     else if (this.state === "dissolve") { if(i%2===0){tx=p.x+Math.random()*2;ty=p.y-Math.random()*2}else{const angle=i;const r=60;tx=175+Math.cos(angle)*r;ty=175+Math.sin(angle)*r} loose=false; targetColor=`rgba(255,255,255,${Math.random()})`; }
-                    else if (this.state === "attack") { const angle=i; const r=70+(i%5)*10; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#e74c3c"; loose=false; tx+=(Math.random()-0.5)*10; ty+=(Math.random()-0.5)*10; }
                     else if (this.state === "coin_flip") { const r = 60; const scale = Math.cos(this.time * 10); tx = 175 + Math.cos(i) * r * scale; ty = 175 + Math.sin(i) * r; targetColor = "#f1c40f"; }
                     else if (this.state === "morph_shape") { const r = 50 + Math.sin(this.time * 5) * 20; const angle = i + this.time; tx = 175 + Math.cos(angle * 3) * r; ty = 175 + Math.sin(angle) * r; targetColor = `hsl(${i % 360}, 70%, 60%)`; }
                     else if (this.state === "flow") { tx = (i / CONFIG.particleCount) * 400; ty = 175 + Math.sin(tx/50 + this.time) * 50; targetColor = "#00d2ff"; }
@@ -199,44 +206,22 @@
                 this.loopTimer = null;
                 this.synth = window.speechSynthesis;
                 this.selectedVoice = null;
-                
                 this.initVoiceSystem();
             }
 
             initVoiceSystem() {
-                // 初始化语音列表
                 const populateVoices = () => {
                     if (!this.synth) return;
                     const voices = this.synth.getVoices().filter(v => v.lang.includes('zh') || v.lang.includes('CN'));
                     const select = document.getElementById('voice-select');
                     select.innerHTML = '';
-                    
-                    if (voices.length === 0) {
-                        select.innerHTML = '<option>默认语音 (无其他选项)</option>';
-                        return;
-                    }
-
-                    voices.forEach((v, index) => {
-                        const option = document.createElement('option');
-                        option.textContent = `${v.name} (${v.lang})`;
-                        option.value = index;
-                        select.appendChild(option);
-                    });
-                    
-                    // 默认选择第一个
+                    if (voices.length === 0) { select.innerHTML = '<option>默认语音 (无其他选项)</option>'; return; }
+                    voices.forEach((v, index) => { const option = document.createElement('option'); option.textContent = `${v.name} (${v.lang})`; option.value = index; select.appendChild(option); });
                     this.selectedVoice = voices[0];
-                    
-                    select.addEventListener('change', (e) => {
-                        this.selectedVoice = voices[e.target.value];
-                    });
+                    select.addEventListener('change', (e) => { this.selectedVoice = voices[e.target.value]; });
                 };
-
                 populateVoices();
-                if (this.synth.onvoiceschanged !== undefined) {
-                    this.synth.onvoiceschanged = populateVoices;
-                }
-
-                // UI 绑定
+                if (this.synth.onvoiceschanged !== undefined) this.synth.onvoiceschanged = populateVoices;
                 const panel = document.getElementById('voice-panel');
                 document.getElementById('setting-btn').addEventListener('click', () => panel.classList.add('open'));
                 document.getElementById('close-panel').addEventListener('click', () => panel.classList.remove('open'));
@@ -245,8 +230,11 @@
             think(text) {
                 const cleanText = text.toLowerCase().trim();
                 if (cleanText.includes("什么意思")) { this.triggerInfiniteLoop(); return; }
+                
+                // 1. 时间逻辑优先判断
                 if (this.checkTimeLogic(cleanText)) return;
 
+                // 2. 场景库匹配
                 const scenario = CONFIG.scenarios.find(s => s.keywords.some(k => cleanText.includes(k)));
                 if (scenario) {
                     this.execute(scenario);
@@ -256,12 +244,40 @@
                 }
             }
 
+            // *** 智能时间逻辑判断 ***
             checkTimeLogic(text) {
                 const hour = new Date().getHours();
-                if (text.includes("早") || text.includes("morning")) { if (hour < 9) { this.speak("早啊打工人。今天也要元气满满地敲代码哦。", "gold_mode"); return true; } }
-                if (text.includes("晚安") || text.includes("睡了")) { this.speak("晚安。我会在这里挂机，帮你守着这片黑暗。", "dark_mode"); return true; }
-                if (text.includes("几点了") || text.includes("时间")) { const timeStr = new Date().toLocaleTimeString(); this.speak(`现在是 ${timeStr}。`, "clock"); return true; }
-                if (hour >= 2 && hour < 5 && !text.includes("晚安")) { this.speak("人类，现在是凌晨！你不睡我还要睡呢！", "attack"); return true; }
+                
+                // 早安 (带时间校验)
+                if (text.includes("早") || text.includes("morning")) {
+                    if (hour < 9) { 
+                        this.speak(CONFIG.timeResponses.morning_early.text, CONFIG.timeResponses.morning_early.action); 
+                        return true; 
+                    } else {
+                        this.speak(CONFIG.timeResponses.morning_late.text, CONFIG.timeResponses.morning_late.action);
+                        return true;
+                    }
+                }
+                
+                // 晚安
+                if (text.includes("晚安") || text.includes("睡了")) {
+                    this.speak(CONFIG.timeResponses.night.text, CONFIG.timeResponses.night.action);
+                    return true;
+                }
+                
+                // 问时间
+                if (text.includes("几点了") || text.includes("时间")) {
+                    const timeStr = new Date().toLocaleTimeString();
+                    const reply = CONFIG.timeResponses.ask_time.text.replace("{time}", timeStr);
+                    this.speak(reply, CONFIG.timeResponses.ask_time.action);
+                    return true;
+                }
+                
+                // 深夜修仙 (被动触发：只要在深夜说话且没说晚安)
+                if (hour >= 2 && hour < 5 && !text.includes("晚安")) {
+                    this.speak(CONFIG.timeResponses.late_night_scold.text, CONFIG.timeResponses.late_night_scold.action);
+                    return true;
+                }
                 return false;
             }
 
@@ -303,8 +319,8 @@
                 this.loopTimer = setInterval(() => {
                     count++;
                     const variants = ["什么意思？", "什么意思！", "意思什么？", "啊？？"];
-                    this.bubble.innerText = variants[count % 4] + "\n".repeat(count % 3) + variants[(count+1)%4];
-                    this.bubble.classList.add("visible");
+                    const txt = variants[count % 4] + "\n".repeat(count % 3) + variants[(count+1)%4];
+                    this.bubble.innerText = txt; this.bubble.classList.add("visible");
                     if (count > 25) {
                         clearInterval(this.loopTimer); this.loopTimer = null;
                         this.speak("嘣！！！！！CPU过载", "explode");
@@ -318,7 +334,6 @@
         const visual = new VisualEngine('main-canvas');
         const brain = new Brain(visual);
 
-        // 移动端音频解锁
         document.body.addEventListener('click', () => {
             if (window.speechSynthesis) window.speechSynthesis.speak(new SpeechSynthesisUtterance(" "));
         }, { once: true });
