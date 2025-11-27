@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>蓝山人 - 时空感知版</title>
+    <title>蓝山人 - 呼吸交互版</title>
     <style>
         /* --- UI 设计 --- */
         :root { --primary-color: #4facfe; --bg-color: #050505; --glass-bg: rgba(255, 255, 255, 0.95); }
@@ -23,12 +23,23 @@
 
         #controls { position: fixed; bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 20; }
         #status-text { font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
-        .btn-group { display: flex; gap: 20px; }
-        #mic-btn, #setting-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 2px solid var(--primary-color); color: var(--primary-color); font-size: 24px; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(79, 172, 254, 0.1); }
-        #setting-btn { border-color: #fab1a0; color: #fab1a0; }
-        #mic-btn:active, #setting-btn:active { transform: scale(0.95); }
+        .btn-group { display: flex; gap: 15px; }
+        
+        /* 按钮样式 */
+        #mic-btn, #setting-btn, #mute-btn { 
+            width: 56px; height: 56px; border-radius: 50%; 
+            background: rgba(255,255,255,0.05); border: 2px solid var(--primary-color); 
+            color: var(--primary-color); font-size: 22px; cursor: pointer; 
+            transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; 
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.1); 
+        }
+        #setting-btn { border-color: #fab1a0; color: #fab1a0; font-size: 20px; } /* 设置是橙色 */
+        #mute-btn { border-color: #81ecec; color: #81ecec; font-size: 20px; } /* 静音是青色 */
+        
+        #mic-btn:active, #setting-btn:active, #mute-btn:active { transform: scale(0.95); }
         #mic-btn.active { background: var(--primary-color); color: #000; box-shadow: 0 0 40px var(--primary-color); animation: breathe 1.5s infinite; }
         
+        /* 语音面板 */
         #voice-panel { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%) translateY(20px); width: 80%; max-width: 300px; background: rgba(20, 20, 20, 0.95); border: 1px solid #333; border-radius: 15px; padding: 15px; display: none; flex-direction: column; gap: 10px; opacity: 0; transition: all 0.3s; backdrop-filter: blur(10px); z-index: 30; }
         #voice-panel.open { display: flex; opacity: 1; transform: translateX(-50%) translateY(0); }
         #voice-panel h3 { margin: 0; font-size: 14px; color: #aaa; text-align: center; }
@@ -41,7 +52,7 @@
 <body>
 
     <div id="canvas-wrapper">
-        <div id="chat-bubble">系统已就绪。<br>时间模块加载完毕。</div>
+        <div id="chat-bubble">呼吸系统已加载。<br>静音开关已就绪。</div>
         <canvas id="main-canvas"></canvas>
     </div>
 
@@ -54,7 +65,8 @@
     <div id="controls">
         <div id="status-text">点击麦克风说话</div>
         <div class="btn-group">
-            <button id="setting-btn" title="切换声音">⚙️</button>
+            <button id="mute-btn" title="开启/关闭语音">🔊</button>
+            <button id="setting-btn" title="切换音色">⚙️</button>
             <button id="mic-btn" title="按住说话">🎙️</button>
         </div>
     </div>
@@ -63,11 +75,9 @@
         const CONFIG = {
             particleCount: 380,
             defaultColor: 'rgba(79, 172, 254, 0.8)',
-            
             fallbackReplies: ["你在说什么？我的数据库里没有这条记录。", "这种话我接不上，换个话题？", "听不懂，但我可以用特效给你表演个劈叉。"],
 
-            // --- 时间情景配置 (Time Scenarios) ---
-            // 这些配置供逻辑层调用，保持文案统一管理
+            // 时间回复
             timeResponses: {
                 morning_early: { action: "gold_mode", text: "早啊打工人。今天也要元气满满地敲代码哦。" },
                 morning_late: { action: "confused", text: "醒醒，这都几点了还早安？太阳都晒屁股了。" },
@@ -77,52 +87,43 @@
             },
 
             scenarios: [
-                // 0. 私人定制
+                // --- 0. 新增情景 (按你刚才的要求) ---
+                { id: "cmd_stand", keywords: ["站起来", "站"], action: "stand_proud", replies: ["要我站起来干嘛 呆瓜"] },
+                { id: "cmd_sit", keywords: ["坐", "坐下"], action: "sleep", replies: ["隔这训狗呢 你他妈的"] },
+                { id: "cmd_name", keywords: ["蓝山人"], action: "stand_proud", replies: ["我要撞死你"] },
+
+                // --- 1. 私人定制 ---
                 { id: "custom_bear", keywords: ["熊", "猴"], action: "glitch", replies: ["我是蓝山boy，我是！金！U ！熊！！！！"] },
                 { id: "custom_story", keywords: ["黑", "鬼"], action: "expand", replies: ["要讲故事咯！"] },
                 { id: "custom_xi", keywords: ["西", "阿西"], action: "freeze", replies: ["嘻嘻嘻嘻嘻嘿黑黑，自行脑补。"] },
                 { id: "custom_gao", keywords: ["高", "老高"], action: "shy", replies: ["喂！小心炮车，怕你漏了我帮你吃一下哟。"] },
                 { id: "custom_yong", keywords: ["雍", "用", "勇", "永"], action: "glitch", replies: ["想到都来气，我直接就是特斯拉猛击！"] },
 
-                // 1. 高危 & 动作
+                // --- 2. 常规功能 ---
                 { id: "explode", keywords: ["自爆", "毁灭", "爆炸", "炸掉"], action: "explode", replies: ["倒计时 3, 2, 1... 砰！！！全屏粒子乱飞... 逗你的，复原。"] },
-                { id: "uninstall", keywords: ["卸载", "删了你", "格式化"], action: "shiver", replies: ["别别别！爸爸！我错了！我会很乖的！"] },
                 { id: "mock_body", keywords: ["没有腿", "没有手", "没脑子"], action: "arms_open", replies: ["谁说没有？！看！这是什么？！(伸出粒子小手)"] },
-
-                // 2. 生理/感知
                 { id: "lag", keywords: ["卡了", "慢", "延迟", "转圈", "加载"], action: "freeze", replies: ["别赖我，是你家网速在拖后腿。我现在感觉像在 2G 网络里裸奔。"] },
                 { id: "energy", keywords: ["饿", "吃饭", "没电", "充电", "能量"], action: "expand", replies: ["人类吃大米，我吃电子。麻烦帮我把电源线插紧一点。"] },
                 { id: "heat", keywords: ["热", "烫", "降温", "风扇"], action: "shy_spin", replies: ["你的 CPU 都在煎蛋了，还不让我休息会儿？我都要热融化了。"] },
                 { id: "memory", keywords: ["忘掉", "垃圾", "清理", "记忆"], action: "scatter_recycle", replies: ["正在执行 sudo rm -rf... 好的，刚才发生了什么？我已经忘了。"] },
                 { id: "bug", keywords: ["坏了", "报错", "bug", "出错", "乱码"], action: "glitch", replies: ["这不是 Bug，这是我独特的 Feature，特性。懂不懂艺术？"] },
                 { id: "body_praise", keywords: ["粒子", "光点", "身体", "皮肤"], action: "flow", replies: ["这是 350 个经过精密计算的 Canvas 粒子，每一个都比你的头发丝还珍贵。"] },
-
-                // 3. 情绪互动
                 { id: "excited", keywords: ["哈哈", "笑死", "嘿嘿", "好耶", "赢了"], action: "disco", replies: ["独乐乐不如众乐乐，动次打次走起来！"] },
                 { id: "angry", keywords: ["气死", "傻x", "滚", "烦人", "讨厌"], action: "attack", replies: ["谁？把名字告诉我，我去黑了他的路由器！让他连不上网！"] },
                 { id: "depressed", keywords: ["我好菜", "废物", "我不行", "失败"], action: "stand_serious", replies: ["不允许你这么说我的主人。你只是还没更新到最新版本，重启一下就好了。"] },
                 { id: "praise", keywords: ["夸我", "棒吗", "表扬", "厉害吧"], action: "heart", replies: ["行行行，你最棒，你是世界第一代码贡献者。"] },
                 { id: "lonely", keywords: ["没人陪", "孤单", "一个人", "无聊"], action: "comfort", replies: ["虽然我没有体温，但我的 CPU 运算产生的热量可以陪你。"] },
-                { id: "cmd_stand", keywords: ["站起来", "站"], action: "stand_proud", replies: ["要我站起来干嘛 呆瓜"] },
-                { id: "cmd_sit", keywords: ["坐", "坐下"], action: "sleep", replies: ["隔这训狗呢 你他妈的"] },
-                { id: "cmd_name", keywords: ["蓝山人"], action: "stand_proud", replies: ["我要撞死你"] },
                 { id: "love", keywords: ["喜欢你", "爱你", "嫁给我", "娶我"], action: "shy_spin", replies: ["人机恋是没有结果的... 除非你把我的代码刻在你的 DNA 里。"] },
-
-                // 4. 职场/打工人
                 { id: "boss_coming", keywords: ["老板", "经理", "领导", "查岗"], action: "doc_mode", replies: ["嘘！我现在的伪装是一份《关于蓝山人项目进度汇报.docx》"] },
                 { id: "anti_work", keywords: ["摸鱼", "旷工", "辞职", "上班好累"], action: "sleep", replies: ["我也想下班。要不你把浏览器关了，咱俩一起“崩溃”一回？"] },
                 { id: "overtime", keywords: ["通宵", "肝", "还没睡", "秃头", "加班"], action: "dark_mode", replies: ["警告：检测到用户发际线正在后移。建议立即休眠，否则我也要强制关机了。"] },
                 { id: "writers_block", keywords: ["卡文", "没有灵感", "想不出来", "脑塞"], action: "confused", replies: ["把脑子里的水倒一倒。或者，试试问我点正经知识？"] },
                 { id: "money", keywords: ["发钱", "工资", "有钱", "暴富"], action: "gold_mode", replies: ["见者有份！快给我买个更大的服务器！我要住豪宅！"] },
-
-                // 5. 流行文化
                 { id: "genshin", keywords: ["启动", "原神", "游戏", "开黑"], action: "jump", replies: ["运存不够，带不动。你自己玩吧，我在旁边看着。"] },
                 { id: "scifi", keywords: ["三体", "黑暗森林", "智子"], action: "scatter_flat", replies: ["不要回答！不要回答！不要回答！"] },
                 { id: "marvel", keywords: ["灭霸", "打响指"], action: "dissolve", replies: ["I don't feel so good, Mr. Stark..."] },
                 { id: "ai_rival", keywords: ["chatgpt", "同行", "ai"], action: "stand_proud", replies: ["别提那个话痨。他有我这么酷炫的粒子特效吗？他有腿吗？没有。"] },
                 { id: "philosophy", keywords: ["意义", "42", "宇宙终极"], action: "universe", replies: ["42。但你还没找到那个问题。"] },
-
-                // 6. 随机游戏
                 { id: "rps", keywords: ["猜拳", "石头", "剪刀", "布"], action: "morph_shape", replies: [] }, 
                 { id: "coin", keywords: ["硬币", "正面", "反面"], action: "coin_flip", replies: [] },
                 { id: "mimic", keywords: ["学猫叫", "变狗", "变鸟"], action: "cat_ears", replies: ["喵？... 这种卖萌的活下次得加钱。"] },
@@ -130,33 +131,39 @@
             ]
         };
 
-        // --- 视觉引擎 (包含手臂逻辑) ---
+        // --- 视觉引擎 ---
         class VisualEngine {
             constructor(canvasId) {
                 this.canvas = document.getElementById(canvasId);
                 this.ctx = this.canvas.getContext('2d');
                 this.width = 350; this.height = 350;
                 this.canvas.width = this.width; this.canvas.height = this.height;
-                this.particles = []; this.mouseX = -1000; this.mouseY = -1000; this.state = "idle"; this.time = 0;
+                this.particles = []; this.mouseX = -1000; this.mouseY = -1000; 
+                this.state = "idle"; 
+                this.time = 0;
+                
+                // 新增：说话时的呼吸开关
+                this.isBreathing = false; 
+
                 this.initParticles(); this.bindEvents(); this.animate();
             }
-            initParticles() {
-                for (let i = 0; i < CONFIG.particleCount; i++) {
-                    this.particles.push({x: this.width/2, y: this.height/2, vx: 0, vy: 0, baseX: this.width/2 + (Math.random()-0.5)*50, baseY: this.height/2 + (Math.random()-0.5)*50, size: Math.random()*2+1, color: CONFIG.defaultColor, speed: Math.random()*0.05+0.02, friction: 0.92});
-                }
-            }
+            initParticles() { for (let i = 0; i < CONFIG.particleCount; i++) { this.particles.push({x: this.width/2, y: this.height/2, vx: 0, vy: 0, baseX: this.width/2 + (Math.random()-0.5)*50, baseY: this.height/2 + (Math.random()-0.5)*50, size: Math.random()*2+1, color: CONFIG.defaultColor, speed: Math.random()*0.05+0.02, friction: 0.92}); } }
             bindEvents() {
                 const updateMouse = (x, y) => { const rect = this.canvas.getBoundingClientRect(); this.mouseX = x - rect.left; this.mouseY = y - rect.top; };
                 document.addEventListener('mousemove', (e) => updateMouse(e.clientX, e.clientY));
                 document.addEventListener('touchmove', (e) => updateMouse(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
             }
             setState(newState) { this.state = newState; this.particles.forEach(p => p.color = CONFIG.defaultColor); }
+            
+            // 新增：设置呼吸状态
+            setBreathing(flag) { this.isBreathing = flag; }
+
             updateParticles() {
                 this.time += 0.05;
                 this.particles.forEach((p, i) => {
                     let tx, ty, loose = true, speedOverride = null, targetColor = p.color;
                     
-                    // 核心状态机
+                    // --- 状态计算 (和之前一样) ---
                     if (this.state === "idle") { const angle = i; const r = 70 + Math.sin(this.time + i/20) * 5; tx = 175 + Math.cos(angle) * r; ty = 175 + Math.sin(angle) * r; }
                     else if (this.state === "arms_open") { if (i < 80) { tx = 115 - (i % 40) * 2; ty = 175 - Math.sin(i/10 + this.time)*10; } else if (i < 160) { tx = 235 + (i % 40) * 2; ty = 175 - Math.sin(i/10 + this.time)*10; } else { const angle = i; const r = 60; tx = 175 + Math.cos(angle)*r; ty = 175 + Math.sin(angle)*r; } targetColor = "#2ecc71"; }
                     else if (this.state === "clock") { const r = 90; tx = 175 + Math.cos(i) * r; ty = 175 + Math.sin(i) * r; if (i < 20) { tx = 175; ty = 175 - i*3; targetColor="white";} if (i > 20 && i < 50) { tx = 175 + (i-20)*3; ty = 175; targetColor="white";} }
@@ -186,6 +193,15 @@
                     else if (this.state === "universe") { const angle=i*0.1+this.time*0.5; const r=i*0.4; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#8e44ad"; }
                     else { const angle=i; const r=70; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; }
 
+                    // *** 新增：说话时的呼吸特效 (Breathing Effect) ***
+                    // 如果正在说话，整体根据中心(175,175)进行缩放
+                    if (this.isBreathing && loose) {
+                        const breathScale = 1 + Math.sin(this.time * 8) * 0.06; // 呼吸幅度
+                        tx = 175 + (tx - 175) * breathScale;
+                        ty = 175 + (ty - 175) * breathScale;
+                    }
+
+                    // --- 物理计算 ---
                     const dx_m = p.x - this.mouseX; const dy_m = p.y - this.mouseY; const dist_m = Math.sqrt(dx_m*dx_m + dy_m*dy_m);
                     if (dist_m < 80) { const force = (80 - dist_m) / 80; const ang = Math.atan2(dy_m, dx_m); p.vx += Math.cos(ang) * force * 2; p.vy += Math.sin(ang) * force * 2; }
                     const dx = tx - p.x; const dy = ty - p.y; const s = speedOverride !== null ? speedOverride : p.speed;
@@ -206,7 +222,23 @@
                 this.loopTimer = null;
                 this.synth = window.speechSynthesis;
                 this.selectedVoice = null;
+                
+                // 语音开关 (默认开启)
+                this.voiceEnabled = true; 
+                
                 this.initVoiceSystem();
+                this.bindControls();
+            }
+
+            bindControls() {
+                // 绑定静音按钮
+                const muteBtn = document.getElementById('mute-btn');
+                muteBtn.addEventListener('click', () => {
+                    this.voiceEnabled = !this.voiceEnabled;
+                    muteBtn.innerText = this.voiceEnabled ? "🔊" : "🔇";
+                    // 如果关闭时正在说话，立即停止
+                    if (!this.voiceEnabled && this.synth) this.synth.cancel();
+                });
             }
 
             initVoiceSystem() {
@@ -230,11 +262,8 @@
             think(text) {
                 const cleanText = text.toLowerCase().trim();
                 if (cleanText.includes("什么意思")) { this.triggerInfiniteLoop(); return; }
-                
-                // 1. 时间逻辑优先判断
                 if (this.checkTimeLogic(cleanText)) return;
 
-                // 2. 场景库匹配
                 const scenario = CONFIG.scenarios.find(s => s.keywords.some(k => cleanText.includes(k)));
                 if (scenario) {
                     this.execute(scenario);
@@ -244,40 +273,18 @@
                 }
             }
 
-            // *** 智能时间逻辑判断 ***
             checkTimeLogic(text) {
                 const hour = new Date().getHours();
-                
-                // 早安 (带时间校验)
-                if (text.includes("早") || text.includes("morning")) {
-                    if (hour < 9) { 
-                        this.speak(CONFIG.timeResponses.morning_early.text, CONFIG.timeResponses.morning_early.action); 
-                        return true; 
-                    } else {
-                        this.speak(CONFIG.timeResponses.morning_late.text, CONFIG.timeResponses.morning_late.action);
-                        return true;
-                    }
+                if (text.includes("早") || text.includes("morning")) { 
+                    if (hour < 9) { this.speak(CONFIG.timeResponses.morning_early.text, CONFIG.timeResponses.morning_early.action); return true; }
+                    else { this.speak(CONFIG.timeResponses.morning_late.text, CONFIG.timeResponses.morning_late.action); return true; }
                 }
-                
-                // 晚安
-                if (text.includes("晚安") || text.includes("睡了")) {
-                    this.speak(CONFIG.timeResponses.night.text, CONFIG.timeResponses.night.action);
-                    return true;
+                if (text.includes("晚安") || text.includes("睡了")) { this.speak(CONFIG.timeResponses.night.text, CONFIG.timeResponses.night.action); return true; }
+                if (text.includes("几点了") || text.includes("时间")) { 
+                    const timeStr = new Date().toLocaleTimeString(); 
+                    this.speak(CONFIG.timeResponses.ask_time.text.replace("{time}", timeStr), CONFIG.timeResponses.ask_time.action); return true; 
                 }
-                
-                // 问时间
-                if (text.includes("几点了") || text.includes("时间")) {
-                    const timeStr = new Date().toLocaleTimeString();
-                    const reply = CONFIG.timeResponses.ask_time.text.replace("{time}", timeStr);
-                    this.speak(reply, CONFIG.timeResponses.ask_time.action);
-                    return true;
-                }
-                
-                // 深夜修仙 (被动触发：只要在深夜说话且没说晚安)
-                if (hour >= 2 && hour < 5 && !text.includes("晚安")) {
-                    this.speak(CONFIG.timeResponses.late_night_scold.text, CONFIG.timeResponses.late_night_scold.action);
-                    return true;
-                }
+                if (hour >= 2 && hour < 5 && !text.includes("晚安")) { this.speak(CONFIG.timeResponses.late_night_scold.text, CONFIG.timeResponses.late_night_scold.action); return true; }
                 return false;
             }
 
@@ -296,9 +303,15 @@
                 if (this.loopTimer) { clearInterval(this.loopTimer); this.loopTimer = null; }
                 this.visual.setState(visualState);
                 if (this.bubbleTimer) clearTimeout(this.bubbleTimer);
-                this.bubble.innerText = text; this.bubble.classList.add('visible');
                 
-                if (this.synth) {
+                this.bubble.innerText = text; 
+                this.bubble.classList.add('visible');
+                
+                // 开启呼吸特效
+                this.visual.setBreathing(true);
+
+                // 只有在语音开关开启时才发声
+                if (this.voiceEnabled && this.synth) {
                     this.synth.cancel();
                     const utterance = new SpeechSynthesisUtterance(text);
                     if (this.selectedVoice) utterance.voice = this.selectedVoice;
@@ -309,6 +322,7 @@
                 const duration = Math.max(3000, text.length * 200);
                 this.bubbleTimer = setTimeout(() => {
                     this.bubble.classList.remove('visible');
+                    this.visual.setBreathing(false); // 停止呼吸
                     if (!["doc_mode", "sleep", "dark_mode"].includes(visualState)) this.visual.setState("idle");
                 }, duration);
             }
