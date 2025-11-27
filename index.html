@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水哥 (Shuige) - 你的个性化粒子伙伴</title>
+    <style>
+        /* --- 1. 基础环境 --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f1115; /*以此深色背景衬托*/
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* --- 2. 水哥的身体结构 --- */
+        #shui-ge-container {
+            position: relative;
+            width: 200px;
+            height: 300px; /* 增加高度给腿部空间 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 核心球体 */
+        #core-body {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 30% 30%, #4facfe, #00f2fe);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.6), 0 0 60px rgba(0, 242, 254, 0.3);
+            position: relative;
+            z-index: 2; /* 身体在腿上面 */
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: breathe 4s infinite ease-in-out;
+        }
+
+        /* 眼睛 */
+        .eyes {
+            position: absolute;
+            top: 40%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .eye {
+            width: 15px;
+            height: 15px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px white;
+            transition: all 0.3s;
+        }
+
+        /* 腿部 (默认隐藏/收缩) */
+        .leg {
+            position: absolute;
+            width: 20px;
+            height: 0px; /* 初始高度为0 */
+            background: linear-gradient(to bottom, #00f2fe, #0099ff);
+            border-radius: 10px;
+            bottom: 80px; /* 从身体底部开始 */
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+            transition: all 0.5s ease-out;
+            z-index: 1;
+            opacity: 0;
+        }
+        .leg.left { left: 70px; transform: rotate(10deg); }
+        .leg.right { right: 70px; transform: rotate(-10deg); }
+
+        /* --- 3. 状态气泡 --- */
+        #chat-bubble {
+            position: absolute;
+            top: 0px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 20px;
+            border-radius: 20px 20px 20px 0;
+            font-size: 15px;
+            color: #333;
+            max-width: 200px;
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+            transition: all 0.3s;
+            pointer-events: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-weight: bold;
+        }
+        #chat-bubble.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        /* --- 4. 动作类 (CSS Classes) --- */
+
+        /* 站立 (伸出腿) */
+        .pose-stand #core-body {
+            transform: translateY(-60px); /* 身体向上 */
+        }
+        .pose-stand .leg {
+            height: 80px; /* 腿变长 */
+            opacity: 1;
+            bottom: 40px; /* 调整位置 */
+        }
+
+        /* 坐下 (压扁，腿收回) */
+        .pose-sit #core-body {
+            transform: scale(1.3, 0.7) translateY(40px);
+        }
+        .pose-sit .leg {
+            height: 0; opacity: 0;
+        }
+
+        /* 生气 (变红，抖动) */
+        .pose-angry #core-body {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #ee0979);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.6);
+            animation: shake 0.5s infinite;
+        }
+        .pose-angry .eye {
+            height: 5px; /* 眯眼 */
+            transform: rotate(20deg);
+        }
+
+        /* 动画关键帧 */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* --- 5. 控制台 --- */
+        #input-area {
+            position: fixed;
+            bottom: 40px;
+            width: 80%;
+            max-width: 500px;
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 15px 20px;
+            border-radius: 30px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            backdrop-filter: blur(5px);
+            transition: border 0.3s;
+        }
+        input:focus { border-color: #00f2fe; }
+        button {
+            padding: 0 30px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #00334e;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="shui-ge-container">
+        <div id="chat-bubble">这里是水哥，请讲。</div>
+        
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+
+        <div id="core-body">
+            <div class="eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="input-area">
+        <input type="text" id="user-input" placeholder="试着输入: 水哥 站起来..." autocomplete="off">
+        <button onclick="processCommand()">发送</button>
+    </div>
+
+    <script>
+        // 核心变量
+        const core = document.getElementById('core-body');
+        const container = document.getElementById('shui-ge-container');
+        const bubble = document.getElementById('chat-bubble');
+        const input = document.getElementById('user-input');
+
+        // 状态管理
+        let lastAction = "";     // 上一次的动作
+        let repeatCount = 0;     // 重复次数计数器
+        let idleTimer = null;    // 空闲计时器 (5秒规则)
+        let isWaiting = false;   // 是否处于“等待指令”状态
+
+        // 监听回车
+        input.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") processCommand();
+        });
+
+        function processCommand() {
+            const rawText = input.value.trim();
+            const text = rawText.toLowerCase();
+            input.value = ""; // 清空输入框
+
+            if (!text) return;
+
+            // 清除之前的定时器（如果有）
+            if (idleTimer) clearTimeout(idleTimer);
+
+            // 逻辑 1: 必须包含 "水哥" 或者是后续对话
+            // 简单的判断：如果输入包含 "水哥"，或者正在等待状态
+            if (text.includes("水哥") || isWaiting) {
+                
+                // 提取指令部分 (去掉 "水哥" 两个字)
+                let command = text.replace("水哥", "").trim();
+
+                // 情况 A: 用户只喊了 "水哥" (command 为空)
+                if (command === "") {
+                    isWaiting = true;
+                    showBubble("干嘛？(我在听)");
+                    resetPose();
+                    
+                    // 启动5秒倒计时
+                    idleTimer = setTimeout(() => {
+                        showBubble("没事喊我干啥？");
+                        isWaiting = false; // 结束等待
+                    }, 5000);
+                    return;
+                }
+
+                // 情况 B: 有具体指令，处理指令
+                isWaiting = false; // 收到指令，结束等待
+                executeAction(command);
+
+            } else {
+                // 如果没喊名字
+                showBubble("请先喊我名字 '水哥'，我有名字的。");
+            }
+        }
+
+        function executeAction(cmd) {
+            // 逻辑 2: 重复检测
+            if (cmd === lastAction) {
+                repeatCount++;
+            } else {
+                lastAction = cmd;
+                repeatCount = 1;
+            }
+
+            // 如果重复了3次
+            if (repeatCount >= 3) {
+                resetPose(); // 恢复原状
+                container.classList.add('pose-angry'); // 加点生气的特效
+                showBubble("搞什么？这么没有想象力？");
+                // 1.5秒后消气
+                setTimeout(() => container.classList.remove('pose-angry'), 1500);
+                return;
+            }
+
+            // 执行正常动作逻辑
+            resetPose(); // 先重置姿态
+
+            // 稍微延迟一点点，让CSS重置生效
+            setTimeout(() => {
+                if (cmd.includes("站") || cmd.includes("起") || cmd.includes("stand")) {
+                    container.classList.add("pose-stand");
+                    showBubble("嘿咻... 站起来了！");
+                } 
+                else if (cmd.includes("坐") || cmd.includes("sit")) {
+                    container.classList.add("pose-sit");
+                    showBubble("好的，坐稳了。");
+                }
+                else if (cmd.includes("跳") || cmd.includes("jump")) {
+                    // 简单的跳跃动画
+                    core.style.animation = "none";
+                    core.offsetHeight; /* trigger reflow */
+                    core.style.animation = "breathe 4s infinite, jumpAnim 0.5s";
+                    showBubble("起飞！");
+                }
+                else if (cmd.includes("变红") || cmd.includes("生气")) {
+                    container.classList.add("pose-angry");
+                    showBubble("我现在火气很大！");
+                }
+                else if (cmd.includes("你好")) {
+                    showBubble("你好，我是水哥。");
+                }
+                else {
+                    // 听不懂
+                    showBubble("听不懂 '" + cmd + "'，说点人话？");
+                    // 此时不计入重复次数，或者可以重置重复次数
+                    repeatCount = 0; 
+                }
+            }, 50);
+        }
+
+        // 辅助：重置所有姿态类
+        function resetPose() {
+            container.classList.remove("pose-stand", "pose-sit", "pose-angry");
+            core.style.animation = "breathe 4s infinite ease-in-out"; // 恢复呼吸
+        }
+
+        // 辅助：显示气泡
+        let bubbleTimer;
+        function showBubble(msg) {
+            bubble.innerText = msg;
+            bubble.classList.add("show");
+            
+            if (bubbleTimer) clearTimeout(bubbleTimer);
+            bubbleTimer = setTimeout(() => {
+                bubble.classList.remove("show");
+            }, 3500);
+        }
+
+    </script>
+</body>
+</html>
