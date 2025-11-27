@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水哥 (Shuige) - 粒子语音版</title>
+    <title>蓝山人</title>
     <style>
         body {
             margin: 0;
@@ -14,204 +14,206 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
             overflow: hidden;
             color: white;
+            user-select: none;
         }
 
-        /* 画布区域 */
+        /* 粒子容器 */
         #canvas-container {
             position: relative;
             width: 400px;
             height: 400px;
-            border-radius: 50%;
-            /* 给整个区域加一点环境光 */
-            background: radial-gradient(circle, rgba(0, 242, 254, 0.05) 0%, transparent 70%);
-        }
-        canvas {
-            display: block;
+            /* 稍微加点蓝色光晕背景 */
+            background: radial-gradient(circle, rgba(64, 150, 255, 0.05) 0%, transparent 70%);
+            cursor: pointer;
         }
 
-        /* 对话气泡 */
+        /* 气泡对话框 */
         #chat-bubble {
             position: absolute;
-            top: 20px;
+            top: 0px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 12px 25px;
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 25px;
             font-size: 16px;
             color: #333;
             opacity: 0;
-            transition: all 0.4s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             pointer-events: none;
-            box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
             font-weight: bold;
-            white-space: nowrap;
+            text-align: center;
+            white-space: pre-wrap; /* 支持换行 */
             z-index: 10;
+            max-width: 280px;
         }
         #chat-bubble.show {
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            transform: translateX(-50%) translateY(-20px);
+        }
+        /* 气泡的小尾巴 */
+        #chat-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
         }
 
         /* 底部控制区 */
         #controls {
             position: fixed;
-            bottom: 40px;
+            bottom: 50px;
             display: flex;
+            flex-direction: column;
+            align-items: center;
             gap: 15px;
             z-index: 20;
-            align-items: center;
         }
 
-        /* 语音按钮 */
+        /* 麦克风按钮 */
         #mic-btn {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            background: #1a1a1a;
-            border: 2px solid #00f2fe;
-            color: #00f2fe;
-            font-size: 24px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid #4facfe;
+            color: #4facfe;
+            font-size: 30px;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
-            transition: all 0.2s;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.2);
+            transition: all 0.3s;
             display: flex;
             justify-content: center;
             align-items: center;
         }
+        #mic-btn:hover {
+            background: rgba(79, 172, 254, 0.1);
+            transform: scale(1.05);
+        }
         #mic-btn:active, #mic-btn.listening {
-            background: #00f2fe;
+            background: #4facfe;
             color: #000;
-            box-shadow: 0 0 30px #00f2fe;
+            box-shadow: 0 0 40px #4facfe;
             transform: scale(0.95);
         }
         #mic-btn.listening {
             animation: pulse 1.5s infinite;
         }
 
-        /* 文字输入框 (备用) */
-        input {
-            padding: 12px 20px;
-            border-radius: 30px;
-            border: 1px solid #333;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            outline: none;
-            width: 200px;
-            backdrop-filter: blur(5px);
+        #tips {
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
         }
-        
+
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 242, 254, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(0, 242, 254, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 242, 254, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(79, 172, 254, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(79, 172, 254, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 172, 254, 0); }
         }
     </style>
 </head>
 <body>
 
     <div id="canvas-container">
-        <div id="chat-bubble">我是水哥，按住麦克风说话。</div>
+        <div id="chat-bubble">你好，我是蓝山人。<br>没事别戳我。</div>
         <canvas id="particleCanvas"></canvas>
     </div>
 
     <div id="controls">
-        <input type="text" id="text-input" placeholder="输入或点击麦克风...">
-        <button id="mic-btn" title="点击开始说话">🎙️</button>
+        <div id="tips">点击麦克风，直接下指令 (无需唤醒词)</div>
+        <button id="mic-btn" title="按住说话">🎙️</button>
     </div>
 
     <script>
-        // --- 1. 语音识别系统 (Web Speech API) ---
+        // --- 1. 核心变量与设置 ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx2d = canvas.getContext('2d');
+        canvas.width = 400;
+        canvas.height = 400;
+
+        let mouseX = -1000, mouseY = -1000;
+        let particles = [];
+        const particleCount = 350; // 粒子稍微多一点
+        let state = "idle"; 
+        let time = 0;
+        
+        // 贱萌文案配置
+        const introText = "你好，我是蓝山人。\n有话快说，我很忙的。";
+
+        // --- 2. 语音识别 (Web Speech API) ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const micBtn = document.getElementById('mic-btn');
-        const textInput = document.getElementById('text-input');
         let recognition;
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.lang = 'zh-CN'; // 设置中文
-            recognition.continuous = false; // 说完一句自动停止
+            recognition.lang = 'zh-CN';
+            recognition.continuous = false; // 说完一句自动结束，避免混乱
             recognition.interimResults = false;
 
-            recognition.onstart = () => {
-                micBtn.classList.add('listening');
-                showBubble("正在听...");
-            };
-
-            recognition.onend = () => {
-                micBtn.classList.remove('listening');
-            };
-
+            recognition.onstart = () => { micBtn.classList.add('listening'); showBubble("正在听... (别太小声)"); };
+            recognition.onend = () => { micBtn.classList.remove('listening'); };
+            
             recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                textInput.value = transcript;
-                processCommand(transcript); // 直接处理结果
+                const text = event.results[0][0].transcript;
+                console.log("收到语音:", text);
+                processCommand(text); // 直接处理，不需要过滤唤醒词
             };
 
             micBtn.onclick = () => {
-                recognition.start();
+                try { recognition.start(); } catch(e) { recognition.stop(); }
             };
         } else {
-            micBtn.style.display = 'none'; // 不支持语音则隐藏按钮
-            showBubble("浏览器不支持语音，请打字。");
+            micBtn.style.display = 'none';
+            document.getElementById('tips').innerText = "当前浏览器不支持语音，请使用 Chrome/Edge";
         }
 
-        // 键盘回车支持
-        textInput.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') processCommand(textInput.value);
-        });
-
-
-        // --- 2. 粒子系统 (Canvas Physics) ---
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.width = 400;
-        const cty = canvas.height = 400;
-        const ctx2d = canvas.getContext('2d');
-
-        // 粒子配置
-        const particleCount = 250;
-        const particles = [];
-        let state = "idle"; // idle, wave, sit, stand, angry, scatter
-        let time = 0;
-
+        // --- 3. 粒子系统 (物理与形状) ---
         class Particle {
             constructor() {
-                // 初始位置：屏幕中心随机
-                this.x = 200 + (Math.random() - 0.5) * 20;
-                this.y = 200 + (Math.random() - 0.5) * 20;
-                // 目标位置
-                this.tx = this.x;
-                this.ty = this.y;
-                // 速度和摩擦
-                this.vx = 0;
-                this.vy = 0;
+                this.x = 200 + (Math.random()-0.5)*50;
+                this.y = 200 + (Math.random()-0.5)*50;
+                this.vx = 0; this.vy = 0;
                 this.friction = 0.92;
-                this.speed = Math.random() * 0.05 + 0.02;
-                this.size = Math.random() * 3 + 1;
-                this.color = `rgba(0, 242, 254, ${Math.random() * 0.5 + 0.5})`;
+                this.speed = Math.random() * 0.08 + 0.04;
+                this.baseColor = `rgba(79, 172, 254, ${Math.random()*0.4 + 0.6})`; // 蓝山人的主色调：天蓝
+                this.color = this.baseColor;
+                this.size = Math.random() * 2 + 1;
             }
 
             update(targetX, targetY, loose) {
-                // 计算去往目标点的力
+                // 鼠标斥力
+                const dx_mouse = this.x - mouseX;
+                const dy_mouse = this.y - mouseY;
+                const dist_mouse = Math.sqrt(dx_mouse*dx_mouse + dy_mouse*dy_mouse);
+                if (dist_mouse < 100) {
+                    const force = (100 - dist_mouse) / 100;
+                    const angle = Math.atan2(dy_mouse, dx_mouse);
+                    this.vx += Math.cos(angle) * force * 3;
+                    this.vy += Math.sin(angle) * force * 3;
+                }
+
+                // 目标吸力
                 const dx = targetX - this.x;
                 const dy = targetY - this.y;
-                
-                // 简单的弹簧物理
                 this.vx += dx * this.speed;
                 this.vy += dy * this.speed;
-                
-                // 加上一点随机扰动（布朗运动），让它看起来像气体/能量
-                if (loose) {
-                    this.vx += (Math.random() - 0.5) * 2;
-                    this.vy += (Math.random() - 0.5) * 2;
+
+                if (loose) { // 增加随机扰动
+                    this.vx += (Math.random()-0.5) * 1.5;
+                    this.vy += (Math.random()-0.5) * 1.5;
                 }
 
                 this.vx *= this.friction;
                 this.vy *= this.friction;
-
                 this.x += this.vx;
                 this.y += this.vy;
             }
@@ -224,200 +226,220 @@
             }
         }
 
-        // 初始化粒子
-        for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle());
-        }
+        // 初始化
+        for(let i=0; i<particleCount; i++) particles.push(new Particle());
 
-        // --- 动画循环 ---
+        // 动画循环
         function animate() {
-            ctx2d.clearRect(0, 0, 400, 400); // 清空画布
+            ctx2d.clearRect(0, 0, 400, 400);
             time += 0.05;
 
-            // 根据状态计算粒子的目标位置
             particles.forEach((p, index) => {
                 let tx, ty, loose = true;
 
+                // --- 形状逻辑 ---
                 if (state === "idle") {
-                    // 核心球体呼吸
+                    // 默认呼吸球
                     const angle = index; 
-                    const r = 50 + Math.sin(time + index) * 5; // 呼吸半径
+                    const r = 70 + Math.sin(time + index/20) * 5; 
                     tx = 200 + Math.cos(angle) * r;
                     ty = 200 + Math.sin(angle) * r;
                 } 
-                else if (state === "wave") {
-                    // 挥手动作
-                    if (index < 50) { 
-                        // 前50个粒子组成一只手
-                        // 手做正弦摆动
-                        const waveX = 280 + Math.cos(time * 3) * 20;
-                        const waveY = 180 + Math.sin(time * 3) * 40;
-                        tx = waveX + (Math.random()-0.5)*15;
-                        ty = waveY + (Math.random()-0.5)*15;
-                        p.color = "rgba(255, 255, 255, 0.9)"; // 手变亮
-                    } else {
-                        // 剩下的保持身体
-                        const angle = index;
-                        const r = 50;
-                        tx = 190 + Math.cos(angle) * r;
-                        ty = 200 + Math.sin(angle) * r;
-                        p.color = "rgba(0, 242, 254, 0.6)";
-                    }
+                else if (state === "heart") {
+                    // 爱心方程
+                    // x = 16sin^3(t), y = 13cos(t)-5cos(2t)-...
+                    const t = (index / particleCount) * Math.PI * 2;
+                    const r = 8; // 缩放系数
+                    tx = 200 + r * (16 * Math.pow(Math.sin(t), 3));
+                    ty = 200 - r * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                    ty -= 10; // 稍微往上提一点
+                    loose = false; // 爱心要紧凑一点
+                    p.color = "#ff6b81"; // 变粉红
+                }
+                else if (state === "doc") {
+                    // 矩形文档 (老板来了)
+                    const side = Math.sqrt(particleCount);
+                    const row = Math.floor(index / side);
+                    const col = index % side;
+                    // 居中绘制矩形
+                    tx = 130 + col * 8; 
+                    ty = 130 + row * 8;
+                    loose = false;
+                    p.color = "#ffffff"; // 变成白纸
                 }
                 else if (state === "stand") {
-                    // 站立：分两组做腿
-                    if (index < 40) { // 左腿
-                        tx = 180 + (Math.random()-0.5)*10;
-                        ty = 280 + (Math.random()-0.5)*40; // 长条形
-                    } else if (index < 80) { // 右腿
-                        tx = 220 + (Math.random()-0.5)*10;
-                        ty = 280 + (Math.random()-0.5)*40;
-                    } else { // 身体上移
-                        const angle = index;
-                        const r = 50;
-                        tx = 200 + Math.cos(angle) * r;
-                        ty = 160 + Math.sin(angle) * r;
+                    // 站立形态
+                    if (index < 60) { // 左腿
+                         tx = 175; ty = 290 + (index % 15) * 4;
+                    } else if (index < 120) { // 右腿
+                         tx = 225; ty = 290 + (index % 15) * 4;
+                    } else { // 身体
+                         tx = 200 + Math.cos(index)*65; ty = 190 + Math.sin(index)*65;
+                    }
+                }
+                else if (state === "angry" || state === "loop") {
+                    // 愤怒 / 鬼畜模式
+                    const r = 70;
+                    // 剧烈震动
+                    const shake = (state === "loop") ? 20 : 5;
+                    tx = 200 + Math.cos(index) * r + (Math.random()-0.5)*shake;
+                    ty = 200 + Math.sin(index) * r + (Math.random()-0.5)*shake;
+                    p.color = (state==="loop") ? `hsl(${Math.random()*360},100%,50%)` : "#ff4757";
+                }
+                else if (state === "wave") {
+                    // 挥手
+                    if (index < 50) { 
+                        const waveX = 300 + Math.cos(time * 5) * 30;
+                        const waveY = 170 + Math.sin(time * 5) * 50;
+                        tx = waveX + (Math.random()-0.5)*15;
+                        ty = waveY + (Math.random()-0.5)*15;
+                        p.color = "#fff";
+                    } else {
+                        tx = 190 + Math.cos(index) * 60;
+                        ty = 200 + Math.sin(index) * 60;
                     }
                 }
                 else if (state === "scatter") {
-                    // 炸开
-                    tx = 200 + (Math.random()-0.5) * 350;
-                    ty = 200 + (Math.random()-0.5) * 350;
+                    // 爆炸
+                    tx = 200 + (Math.random()-0.5)*800;
+                    ty = 200 + (Math.random()-0.5)*800;
                     loose = false;
                 }
-                else if (state === "angry") {
-                    // 愤怒震动
-                    const r = 60;
-                    tx = 200 + Math.cos(index) * r + (Math.random()-0.5)*10;
-                    ty = 200 + Math.sin(index) * r + (Math.random()-0.5)*10;
-                    p.color = `rgba(255, ${Math.random()*50}, 0, 0.8)`; // 变红
+
+                // 颜色复原逻辑
+                if (state !== "heart" && state !== "doc" && state !== "angry" && state !== "wave" && state !== "loop") {
+                    p.color = p.baseColor;
                 }
 
                 p.update(tx, ty, loose);
                 p.draw();
             });
-
             requestAnimationFrame(animate);
         }
         animate();
 
+        // 鼠标交互监听
+        document.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
 
-        // --- 3. 逻辑控制中心 (水哥的大脑) ---
+        // --- 4. 贱萌逻辑核心 ---
         const bubble = document.getElementById('chat-bubble');
         let bubbleTimer;
-        let lastAction = "";
-        let repeatCount = 0;
-        let idleTimer = null;
-        let isWaiting = false;
+        let loopTimer; // 用于鬼畜循环
 
         function processCommand(rawText) {
             if (!rawText) return;
             const text = rawText.toLowerCase().trim();
 
-            // 重置计时器
-            if (idleTimer) clearTimeout(idleTimer);
-
-            // 1. 是否喊了名字
-            if (text.includes("水哥") || isWaiting) {
-                let cmd = text.replace("水哥", "").replace("，", "").replace("。", "").trim();
-
-                // 只有名字
-                if (!cmd) {
-                    isWaiting = true;
-                    showBubble("我在。请讲？");
-                    setState("idle");
-                    // 5秒后吐槽
-                    idleTimer = setTimeout(() => {
-                        showBubble("没事喊我干啥？我很忙的。");
-                        setState("angry"); // 假装生气一下
-                        setTimeout(() => setState("idle"), 2000);
-                        isWaiting = false;
-                    }, 5000);
-                    return;
-                }
-
-                isWaiting = false; // 收到指令
-
-                // 2. 检查重复 (性格系统)
-                if (cmd === lastAction) {
-                    repeatCount++;
-                    if (repeatCount >= 3) {
-                        showBubble("搞什么？这么没有想象力？");
-                        setState("angry");
-                        setTimeout(() => setState("idle"), 2000);
-                        return;
-                    }
-                } else {
-                    lastAction = cmd;
-                    repeatCount = 1;
-                }
-
-                // 3. 指令解析与执行
-                handleSpecificCommand(cmd);
-
-            } else {
-                showBubble("请先喊我的名字：水哥。");
+            // 1. 优先检测彩蛋指令：什么意思
+            if (text.includes("什么意思")) {
+                triggerInfiniteLoop();
+                return;
             }
-        }
 
-        function handleSpecificCommand(cmd) {
-            // 你好 -> 挥手
-            if (cmd.includes("你好") || cmd.includes("hello") || cmd.includes("hi")) {
-                showBubble("你好呀！(挥手)");
-                setState("wave");
-                setTimeout(() => setState("idle"), 3000); // 3秒后恢复
+            // 2. 正常指令库
+            if (text.includes("你好") || text.includes("hi")) {
+                reply("叫我蓝山人。\n手就不挥了，省电。", "stand");
             }
-            // 站起来
-            else if (cmd.includes("站") || cmd.includes("起立")) {
-                showBubble("嘿咻... 站起来了！");
-                setState("stand");
+            else if (text.includes("帅") || text.includes("棒") || text.includes("牛")) {
+                reply("低调。\n这只是我 10% 的颜值。", "wave"); // 还是忍不住挥了一下
             }
-            // 坐下
-            else if (cmd.includes("坐") || cmd.includes("休息")) {
-                showBubble("好的，变回圆球。");
-                setState("idle");
+            else if (text.includes("难过") || text.includes("不开心") || text.includes("安慰")) {
+                reply("行吧，借个肩膀给你。\n(勉为其难比个心)", "heart");
+                setTimeout(() => setState("idle"), 4000);
             }
-            // 炸开/消失
-            else if (cmd.includes("炸") || cmd.includes("散") || cmd.includes("消失")) {
-                showBubble("嘭！！！");
-                setState("scatter");
-                setTimeout(() => setState("idle"), 2000);
+            else if (text.includes("老板") || text.includes("来了")) {
+                reply("嘘！\n我现在的伪装是一个 Word 文档。", "doc");
             }
-            // 生气
-            else if (cmd.includes("生气") || cmd.includes("红")) {
-                showBubble("我很生气！后果很严重！");
-                setState("angry");
+            else if (text.includes("笨") || text.includes("傻") || text.includes("猪")) {
+                reply("反弹！\n小心我顺着网线过去卡死你浏览器！", "angry");
+                setTimeout(() => setState("idle"), 3000);
             }
-            // 夸奖
-            else if (cmd.includes("帅") || cmd.includes("厉害") || cmd.includes("棒")) {
-                showBubble("低调，低调，也就世界第三。");
-                // 兴奋地闪烁 (通过 idle 配合颜色变化，这里简化处理)
-                setState("wave"); 
+            else if (text.includes("跳") || text.includes("舞") || text.includes("蹦迪")) {
+                reply("不跳，腿酸。\n你自己跳吧。", "idle"); // 傲娇拒绝
+            }
+            else if (text.includes("炸") || text.includes("消失")) {
+                reply("想得美，我偏不。", "stand"); // 叛逆
+            }
+            else if (text.includes("我是谁")) {
+                reply("你是那个甚至不会写 Canvas 代码的人类。", "idle");
             }
             else {
-                showBubble("没听懂 \"" + cmd + "\"，能换个说法吗？");
+                // 听不懂时的贱萌回复
+                const confuse = [
+                    "你说啥？信号不好。",
+                    "这超出了我的认知范围。",
+                    "建议去修一下麦克风，或者是嘴。",
+                    "我不听我不听。"
+                ];
+                reply(confuse[Math.floor(Math.random()*confuse.length)], "idle");
             }
         }
 
-        // 状态切换辅助
-        function setState(newState) {
-            state = newState;
-            // 状态切换时，重置粒子颜色 (除了特殊状态)
-            particles.forEach(p => {
-                if (newState !== "angry") {
-                    p.color = `rgba(0, 242, 254, ${Math.random() * 0.5 + 0.5})`;
+        // --- 特殊逻辑：鬼畜循环自爆 ---
+        function triggerInfiniteLoop() {
+            if (loopTimer) return; // 已经在循环了
+
+            let count = 0;
+            setState("loop");
+            
+            // 开启高频刷屏
+            loopTimer = setInterval(() => {
+                count++;
+                const variants = ["什么意思？", "什么意思！", "意思什么？", "啊？？"];
+                const txt = variants[count % 4] + "\n".repeat(count % 3) + variants[(count+1)%4];
+                
+                // 强制显示不消失
+                bubble.innerText = txt;
+                bubble.classList.add("show");
+                
+                if (count > 20) { // 循环20次后（约2秒）
+                    clearInterval(loopTimer);
+                    loopTimer = null;
+                    reply("嘣！！！！！\n(CPU过载)", "scatter");
+                    setTimeout(() => {
+                        reply("复活了。\n下次别这么玩了。", "idle");
+                    }, 4000);
                 }
-            });
+            }, 100); // 每100毫秒刷一次
+        }
+
+        // 统一回复函数
+        function reply(text, actionState) {
+            // 清除之前的定时器
+            if (bubbleTimer) clearTimeout(bubbleTimer);
+            if (loopTimer) { clearInterval(loopTimer); loopTimer = null; }
+
+            setState(actionState);
+            bubble.innerText = text;
+            bubble.classList.add("show");
+            
+            // 3.5秒后隐藏气泡
+            bubbleTimer = setTimeout(() => {
+                bubble.classList.remove("show");
+                // 如果是特殊状态，自动恢复
+                if (actionState !== "idle" && actionState !== "doc") {
+                    setState("idle");
+                }
+            }, 3500);
         }
 
         function showBubble(text) {
             bubble.innerText = text;
             bubble.classList.add("show");
-            if (bubbleTimer) clearTimeout(bubbleTimer);
-            bubbleTimer = setTimeout(() => {
-                bubble.classList.remove("show");
-            }, 3000);
         }
+
+        function setState(s) {
+            state = s;
+        }
+
+        // 开场白
+        setTimeout(() => {
+            reply(introText, "stand");
+        }, 500);
 
     </script>
 </body>
