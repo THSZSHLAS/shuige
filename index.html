@@ -127,11 +127,10 @@
                 { id: "rps", keywords: ["猜拳", "石头", "剪刀", "布"], action: "morph_shape", replies: [] }, 
                 { id: "coin", keywords: ["硬币", "正面", "反面"], action: "coin_flip", replies: [] },
                 { id: "mimic", keywords: ["学猫叫", "变狗", "变鸟"], action: "cat_ears", replies: ["喵？... 这种卖萌的活下次得加钱。"] },
-                { id: "action_wave", keywords: ["挥手", "招手", "拜拜"], action: "arms_open", replies: ["(用力挥动粒子手臂) 嗨！看到我了吗？", "拜拜！我会想你的。"] },
-                { id: "action_hello", keywords: ["你好", "hi", "hello", "哈喽"], action: "arms_open", replies: ["你好呀！蓝山人随时待命。", "Hi！今天过得怎么样？"] },
-                { id: "action_jump", keywords: ["跳", "跳一下", "起飞", "蹦"], action: "jump", replies: ["芜湖！起飞！", "看我蹦得高不高？", "地心引力抓不住我！"] },
-                { id: "action_salute", keywords: ["敬礼", "收到", "yes sir"], action: "stand_proud", replies: ["Yes Sir! 保证完成任务！", "(严肃敬礼) 时刻准备着！", "长官好！"] },
-                { id: "action_wake", keywords: ["睁开眼", "睁眼", "醒醒", "别睡了"], action: "idle", replies: ["我一直醒着呢，只是在后台冥想。", "👀 早就醒啦！", "(揉揉眼睛) 充满电量！"] },
+                { id: "action_wave", keywords: ["挥手", "招手", "拜拜"], action: "wave_hand", replies: ["(挥动粒子手臂) 嗨！看到我了吗？", "拜拜！下次见！"] },
+                { id: "action_jump", keywords: ["跳", "跳一下", "起飞", "蹦"], action: "jump_ball", replies: ["芜湖！起飞！", "地心引力抓不住我！"] },
+                { id: "action_salute", keywords: ["敬礼", "收到", "yes sir"], action: "salute", replies: ["Yes Sir! 保证完成任务！", "(严肃敬礼) 长官好！"] },
+                { id: "action_wake", keywords: ["睁开眼", "睁眼", "醒醒"], action: "open_eyes", replies: ["👀 早就醒啦！", "(眨巴眼睛) 充满电量！"] },
                 { id: "choice", keywords: ["帮我选", "吃什么"], action: "thinking", replies: [] }
             ]
         };
@@ -196,6 +195,86 @@
                     else if (this.state === "comfort") { const angle=i; const r=120; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#fab1a0"; }
                     else if (this.state === "thinking") { const angle=i+this.time*2; const r=40; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#0984e3"; }
                     else if (this.state === "universe") { const angle=i*0.1+this.time*0.5; const r=i*0.4; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#8e44ad"; }
+                        else if (this.state === "wave_hand") {
+                        // 前 50 个粒子组成一只手
+                        if (i < 50) { 
+                            // 手臂摆动逻辑：以身体右侧为圆心，做扇形运动
+                            const waveSpeed = this.time * 8;
+                            const handX = 240 + Math.cos(waveSpeed) * 30; // 左右摆
+                            const handY = 150 + Math.sin(waveSpeed) * 30 - Math.abs(Math.sin(waveSpeed)*15); // 上下摆
+                            
+                            // 让粒子在手的位置聚集，稍微有点散布
+                            tx = handX + (Math.random()-0.5) * 15;
+                            ty = handY + (Math.random()-0.5) * 15;
+                            targetColor = "#ffffff"; // 手是亮白色的
+                            loose = false;
+                        } else {
+                            // 剩下的粒子保持身体不动
+                            const angle = i; const r = 65;
+                            tx = 175 + Math.cos(angle)*r; 
+                            ty = 175 + Math.sin(angle)*r;
+                        }
+                    }
+
+                    // === 🆕 新增：跳跃 (变成球上下动) ===
+                    else if (this.state === "jump_ball") {
+                        // 1. 变成紧凑的球 (半径变小 r=35)
+                        const r = 35;
+                        // 2. 整体上下跳动 (bounce)
+                        // Math.abs(Math.sin) 让它像弹力球一样只在地面上方跳
+                        const bounceHeight = Math.abs(Math.sin(this.time * 6)) * 150; 
+                        
+                        const angle = i;
+                        // x 保持中心，y 随跳动变化 (基准线 280 是地面)
+                        tx = 175 + Math.cos(angle) * r;
+                        ty = 280 - bounceHeight + Math.sin(angle) * r;
+                        
+                        targetColor = "#f1c40f"; // 变成金球
+                        speedOverride = 0.2; // 动作要快！
+                        loose = false; // 结构紧凑
+                    }
+
+                    // === 🆕 新增：敬礼 (一只手对着头) ===
+                    else if (this.state === "salute") {
+                        // 前 40 个粒子组成手，放在额头位置 (右上角)
+                        if (i < 40) {
+                            // 额头位置大约在 (210, 130)
+                            tx = 210 + (Math.random()-0.5) * 20;
+                            ty = 130 + (Math.random()-0.5) * 10; // 扁平一点，像手掌
+                            targetColor = "#ffffff";
+                            loose = false;
+                        } else {
+                            // 身体站得直直的 (椭圆)
+                            const angle = i; 
+                            tx = 175 + Math.cos(angle) * 60;
+                            ty = 185 + Math.sin(angle) * 70; // 拉长一点显高
+                            targetColor = "#34495e"; // 严肃深蓝
+                        }
+                    }
+
+                    // === 🆕 新增：睁眼 (圆球中上显示两个对称点) ===
+                    else if (this.state === "open_eyes") {
+                        // 左眼 (前20个粒子)
+                        if (i < 20) {
+                            tx = 145 + Math.cos(i) * 5; // x: 175-30
+                            ty = 155 + Math.sin(i) * 5; // y: 偏上
+                            targetColor = "#ffffff"; // 亮眼
+                            loose = false;
+                        } 
+                        // 右眼 (20-40个粒子)
+                        else if (i >= 20 && i < 40) {
+                            tx = 205 + Math.cos(i) * 5; // x: 175+30
+                            ty = 155 + Math.sin(i) * 5;
+                            targetColor = "#ffffff";
+                            loose = false;
+                        }
+                        // 身体 (其余粒子)
+                        else {
+                            const angle = i; const r = 75;
+                            tx = 175 + Math.cos(angle) * r;
+                            ty = 175 + Math.sin(angle) * r;
+                        }
+                    }
                     else { const angle=i; const r=70; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; }
 
                     // *** 新增：说话时的呼吸特效 (Breathing Effect) ***
