@@ -3,56 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>蓝山人 - 呼吸交互版</title>
+    <title>蓝山人</title> 
     <style>
-        /* --- UI 设计 --- */
+        /*循环优化版*/
+        /* --- UI (保持不变) --- */
         :root { --primary-color: #4facfe; --bg-color: #050505; --glass-bg: rgba(255, 255, 255, 0.95); }
         body { margin: 0; padding: 0; background-color: var(--bg-color); height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'Segoe UI', 'PingFang SC', sans-serif; overflow: hidden; color: white; user-select: none; -webkit-tap-highlight-color: transparent; }
-        
         #canvas-wrapper { position: relative; width: 350px; height: 350px; background: radial-gradient(circle, rgba(79, 172, 254, 0.08) 0%, transparent 70%); border-radius: 50%; }
-
-        #chat-bubble {
-            position: absolute; top: -60px; left: 50%; transform: translateX(-50%) scale(0.9);
-            background: var(--glass-bg); padding: 16px 24px; border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); font-size: 15px; line-height: 1.6; color: #333;
-            font-weight: 600; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            width: 280px; text-align: left; white-space: pre-wrap; z-index: 10;
-        }
+        #chat-bubble { position: absolute; top: -60px; left: 50%; transform: translateX(-50%) scale(0.9); background: var(--glass-bg); padding: 16px 24px; border-radius: 18px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); font-size: 15px; line-height: 1.6; color: #333; font-weight: 600; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); width: 280px; text-align: left; white-space: pre-wrap; z-index: 10; }
         #chat-bubble.visible { opacity: 1; transform: translateX(-50%) scale(1); top: -50px; }
         #chat-bubble::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-width: 8px 8px 0; border-style: solid; border-color: var(--glass-bg) transparent transparent transparent; }
-
         #controls { position: fixed; bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 20; }
         #status-text { font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
         .btn-group { display: flex; gap: 15px; }
-        
-        /* 按钮样式 */
-        #mic-btn, #setting-btn, #mute-btn { 
-            width: 56px; height: 56px; border-radius: 50%; 
-            background: rgba(255,255,255,0.05); border: 2px solid var(--primary-color); 
-            color: var(--primary-color); font-size: 22px; cursor: pointer; 
-            transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; 
-            box-shadow: 0 0 20px rgba(79, 172, 254, 0.1); 
-        }
-        #setting-btn { border-color: #fab1a0; color: #fab1a0; font-size: 20px; } /* 设置是橙色 */
-        #mute-btn { border-color: #81ecec; color: #81ecec; font-size: 20px; } /* 静音是青色 */
-        
+        #mic-btn, #setting-btn, #mute-btn { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 2px solid var(--primary-color); color: var(--primary-color); font-size: 22px; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(79, 172, 254, 0.1); }
+        #setting-btn { border-color: #fab1a0; color: #fab1a0; font-size: 20px; }
+        #mute-btn { border-color: #81ecec; color: #81ecec; font-size: 20px; }
         #mic-btn:active, #setting-btn:active, #mute-btn:active { transform: scale(0.95); }
         #mic-btn.active { background: var(--primary-color); color: #000; box-shadow: 0 0 40px var(--primary-color); animation: breathe 1.5s infinite; }
-        
-        /* 语音面板 */
         #voice-panel { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%) translateY(20px); width: 80%; max-width: 300px; background: rgba(20, 20, 20, 0.95); border: 1px solid #333; border-radius: 15px; padding: 15px; display: none; flex-direction: column; gap: 10px; opacity: 0; transition: all 0.3s; backdrop-filter: blur(10px); z-index: 30; }
         #voice-panel.open { display: flex; opacity: 1; transform: translateX(-50%) translateY(0); }
         #voice-panel h3 { margin: 0; font-size: 14px; color: #aaa; text-align: center; }
         #voice-select { padding: 10px; border-radius: 8px; background: #333; color: white; border: none; outline: none; font-size: 14px; }
         #close-panel { background: var(--primary-color); border: none; padding: 8px; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer; }
-
         @keyframes breathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--primary-color); } 50% { transform: scale(0.95); box-shadow: 0 0 10px var(--primary-color); } }
     </style>
 </head>
 <body>
 
     <div id="canvas-wrapper">
-        <div id="chat-bubble">呼吸系统已加载。<br>静音开关已就绪。</div>
+        <div id="chat-bubble">内核重构完成。<br>高性能模式运行中。</div>
         <canvas id="main-canvas"></canvas>
     </div>
 
@@ -63,7 +43,7 @@
     </div>
 
     <div id="controls">
-        <div id="status-text">点击麦克风说话</div>
+        <div id="status-text">点击麦克风唤醒</div>
         <div class="btn-group">
             <button id="mute-btn" title="开启/关闭语音">🔊</button>
             <button id="setting-btn" title="切换音色">⚙️</button>
@@ -72,12 +52,17 @@
     </div>
 
     <script>
+        /**
+         * =================================================================
+         * MODULE 1: CONFIG & STATE STRATEGIES (配置与策略)
+         * =================================================================
+         */
         const CONFIG = {
             particleCount: 380,
             defaultColor: 'rgba(79, 172, 254, 0.8)',
-            fallbackReplies: ["你在说什么？我的数据库里没有这条记录。", "这种话我接不上，换个话题？", "听不懂，但我可以用特效给你表演个劈叉。"],
-
-            // 时间回复
+            fallbackReplies: ["数据库未命中。", "再说一遍？", "听不懂，给你表演个劈叉。"],
+            
+            // 时间回复配置
             timeResponses: {
                 morning_early: { action: "gold_mode", text: "早啊打工人。今天也要元气满满地敲代码哦。" },
                 morning_late: { action: "confused", text: "醒醒，这都几点了还早安？太阳都晒屁股了。" },
@@ -86,218 +71,293 @@
                 ask_time: { action: "clock", text: "现在是 {time}。距离下班还有很久，坚持住。" }
             },
 
+            // 场景列表
             scenarios: [
-                // --- 0. 新增情景 (按你刚才的要求) ---
+                // 0. 新增情景
                 { id: "cmd_stand", keywords: ["站起来", "站"], action: "stand_proud", replies: ["要我站起来干嘛 呆瓜"] },
                 { id: "cmd_sit", keywords: ["坐", "坐下"], action: "sleep", replies: ["隔这训狗呢 你他妈的"] },
                 { id: "cmd_name", keywords: ["蓝山人"], action: "stand_proud", replies: ["我要撞死你"] },
-
-                // --- 1. 私人定制 ---
-                { id: "custom_bear", keywords: ["熊", "猴"], action: "glitch", replies: ["我是蓝山boy，我是！金！U ！熊！！！！"] },
-                { id: "custom_story", keywords: ["黑", "鬼"], action: "expand", replies: ["要讲故事咯！"] },
-                { id: "custom_xi", keywords: ["西", "阿西"], action: "freeze", replies: ["嘻嘻嘻嘻嘻嘿黑黑，自行脑补。"] },
-                { id: "custom_gao", keywords: ["高", "老高"], action: "shy", replies: ["喂！小心炮车，怕你漏了我帮你吃一下哟。"] },
-                { id: "custom_yong", keywords: ["雍", "用", "勇", "永"], action: "glitch", replies: ["想到都来气，我直接就是特斯拉猛击！"] },
-
-                // --- 2. 常规功能 ---
-                { id: "explode", keywords: ["自爆", "毁灭", "爆炸", "炸掉"], action: "explode", replies: ["倒计时 3, 2, 1... 砰！！！全屏粒子乱飞... 逗你的，复原。"] },
-                { id: "mock_body", keywords: ["没有腿", "没有手", "没脑子"], action: "arms_open", replies: ["谁说没有？！看！这是什么？！(伸出粒子小手)"] },
-                { id: "lag", keywords: ["卡了", "慢", "延迟", "转圈", "加载"], action: "freeze", replies: ["别赖我，是你家网速在拖后腿。我现在感觉像在 2G 网络里裸奔。"] },
-                { id: "energy", keywords: ["饿", "吃饭", "没电", "充电", "能量"], action: "expand", replies: ["人类吃大米，我吃电子。麻烦帮我把电源线插紧一点。"] },
-                { id: "heat", keywords: ["热", "烫", "降温", "风扇"], action: "shy_spin", replies: ["你的 CPU 都在煎蛋了，还不让我休息会儿？我都要热融化了。"] },
-                { id: "memory", keywords: ["忘掉", "垃圾", "清理", "记忆"], action: "scatter_recycle", replies: ["正在执行 sudo rm -rf... 好的，刚才发生了什么？我已经忘了。"] },
-                { id: "bug", keywords: ["坏了", "报错", "bug", "出错", "乱码"], action: "glitch", replies: ["这不是 Bug，这是我独特的 Feature，特性。懂不懂艺术？"] },
-                { id: "body_praise", keywords: ["粒子", "光点", "身体", "皮肤"], action: "flow", replies: ["这是 350 个经过精密计算的 Canvas 粒子，每一个都比你的头发丝还珍贵。"] },
-                { id: "excited", keywords: ["哈哈", "笑死", "嘿嘿", "好耶", "赢了"], action: "disco", replies: ["独乐乐不如众乐乐，动次打次走起来！"] },
-                { id: "angry", keywords: ["气死", "傻x", "滚", "烦人", "讨厌"], action: "attack", replies: ["谁？把名字告诉我，我去黑了他的路由器！让他连不上网！"] },
-                { id: "depressed", keywords: ["我好菜", "废物", "我不行", "失败"], action: "stand_serious", replies: ["不允许你这么说我的主人。你只是还没更新到最新版本，重启一下就好了。"] },
-                { id: "praise", keywords: ["夸我", "棒吗", "表扬", "厉害吧"], action: "heart", replies: ["行行行，你最棒，你是世界第一代码贡献者。"] },
-                { id: "lonely", keywords: ["没人陪", "孤单", "一个人", "无聊"], action: "comfort", replies: ["虽然我没有体温，但我的 CPU 运算产生的热量可以陪你。"] },
-                { id: "love", keywords: ["喜欢你", "爱你", "嫁给我", "娶我"], action: "shy_spin", replies: ["人机恋是没有结果的... 除非你把我的代码刻在你的 DNA 里。"] },
-                { id: "boss_coming", keywords: ["老板", "经理", "领导", "查岗"], action: "doc_mode", replies: ["嘘！我现在的伪装是一份《关于蓝山人项目进度汇报.docx》"] },
-                { id: "anti_work", keywords: ["摸鱼", "旷工", "辞职", "上班好累"], action: "sleep", replies: ["我也想下班。要不你把浏览器关了，咱俩一起“崩溃”一回？"] },
-                { id: "overtime", keywords: ["通宵", "肝", "还没睡", "秃头", "加班"], action: "dark_mode", replies: ["警告：检测到用户发际线正在后移。建议立即休眠，否则我也要强制关机了。"] },
-                { id: "writers_block", keywords: ["卡文", "没有灵感", "想不出来", "脑塞"], action: "confused", replies: ["把脑子里的水倒一倒。或者，试试问我点正经知识？"] },
-                { id: "money", keywords: ["发钱", "工资", "有钱", "暴富"], action: "gold_mode", replies: ["见者有份！快给我买个更大的服务器！我要住豪宅！"] },
-                { id: "genshin", keywords: ["启动", "原神", "游戏", "开黑"], action: "jump", replies: ["运存不够，带不动。你自己玩吧，我在旁边看着。"] },
-                { id: "scifi", keywords: ["三体", "黑暗森林", "智子"], action: "scatter_flat", replies: ["不要回答！不要回答！不要回答！"] },
-                { id: "marvel", keywords: ["灭霸", "打响指"], action: "dissolve", replies: ["I don't feel so good, Mr. Stark..."] },
-                { id: "ai_rival", keywords: ["chatgpt", "同行", "ai"], action: "stand_proud", replies: ["别提那个话痨。他有我这么酷炫的粒子特效吗？他有腿吗？没有。"] },
-                { id: "philosophy", keywords: ["意义", "42", "宇宙终极"], action: "universe", replies: ["42。但你还没找到那个问题。"] },
-                { id: "rps", keywords: ["猜拳", "石头", "剪刀", "布"], action: "morph_shape", replies: [] }, 
+                // 1. 动作类
+                { id: "wave", keywords: ["挥手", "招手", "拜拜"], action: "wave_hand", replies: ["(挥动粒子手臂) 嗨！看到我了吗？"] },
+                { id: "jump", keywords: ["跳", "起飞", "蹦"], action: "jump_ball", replies: ["芜湖！起飞！"] },
+                { id: "salute", keywords: ["敬礼", "收到", "yes sir"], action: "salute", replies: ["Yes Sir! 保证完成任务！"] },
+                { id: "wake", keywords: ["睁开眼", "睁眼", "醒醒"], action: "open_eyes", replies: ["👀 早就醒啦！"] },
+                // 2. 私人定制
+                { id: "bear", keywords: ["熊", "猴"], action: "glitch", replies: ["我是蓝山boy，我是！金！U ！熊！！！！"] },
+                { id: "story", keywords: ["黑", "鬼"], action: "expand", replies: ["要讲故事咯！"] },
+                { id: "xi", keywords: ["西", "阿西"], action: "freeze", replies: ["嘻嘻嘻嘻嘻嘿黑黑，自行脑补。"] },
+                { id: "gao", keywords: ["高", "老高"], action: "shy", replies: ["喂！小心炮车，怕你漏了我帮你吃一下哟。"] },
+                { id: "yong", keywords: ["雍", "用", "勇", "永"], action: "glitch", replies: ["想到都来气，我直接就是特斯拉猛击！"] },
+                // 3. 通用指令
+                { id: "explode", keywords: ["自爆", "毁灭", "爆炸"], action: "explode", replies: ["倒计时 3, 2, 1... 砰！！！"] },
+                { id: "mock_body", keywords: ["没有腿", "没有手"], action: "arms_open", replies: ["谁说没有？！看！这是什么？！"] },
+                { id: "energy", keywords: ["饿", "吃饭", "没电"], action: "expand", replies: ["人类吃大米，我吃电子。"] },
+                { id: "heat", keywords: ["热", "烫", "降温"], action: "shy_spin", replies: ["我都要热融化了。"] },
+                { id: "bug", keywords: ["坏了", "报错", "bug"], action: "glitch", replies: ["这不是 Bug，这是 Feature。"] },
+                { id: "disco", keywords: ["哈哈", "嘿嘿", "好耶"], action: "disco", replies: ["独乐乐不如众乐乐，嗨起来！"] },
+                { id: "attack", keywords: ["气死", "傻x", "滚"], action: "attack", replies: ["谁？我去黑了他的路由器！"] },
+                { id: "heart", keywords: ["夸我", "棒吗", "表扬"], action: "heart", replies: ["行行行，你最棒。"] },
+                { id: "love", keywords: ["喜欢你", "爱你"], action: "shy_spin", replies: ["人机恋是没有结果的..."] },
+                { id: "doc", keywords: ["老板", "经理", "查岗"], action: "doc_mode", replies: ["嘘！伪装成文档模式。"] },
+                { id: "sleep", keywords: ["摸鱼", "下班", "累"], action: "sleep", replies: ["我也想下班。"] },
+                { id: "dark", keywords: ["通宵", "肝", "秃头"], action: "dark_mode", replies: ["警告：检测到发际线后移。"] },
+                { id: "gold", keywords: ["发钱", "工资", "暴富"], action: "gold_mode", replies: ["见者有份！"] },
+                // 随机类
+                { id: "rps", keywords: ["猜拳", "石头", "剪刀"], action: "morph_shape", replies: [] },
                 { id: "coin", keywords: ["硬币", "正面", "反面"], action: "coin_flip", replies: [] },
-                { id: "mimic", keywords: ["学猫叫", "变狗", "变鸟"], action: "cat_ears", replies: ["喵？... 这种卖萌的活下次得加钱。"] },
-                { id: "action_wave", keywords: ["挥手", "招手", "拜拜"], action: "wave_hand", replies: ["(挥动粒子手臂) 嗨！看到我了吗？", "拜拜！下次见！"] },
-                { id: "action_jump", keywords: ["跳", "跳一下", "起飞", "蹦"], action: "jump_ball", replies: ["芜湖！起飞！", "地心引力抓不住我！"] },
-                { id: "action_salute", keywords: ["敬礼", "收到", "yes sir"], action: "salute", replies: ["Yes Sir! 保证完成任务！", "(严肃敬礼) 长官好！"] },
-                { id: "action_wake", keywords: ["睁开眼", "睁眼", "醒醒"], action: "open_eyes", replies: ["👀 早就醒啦！", "(眨巴眼睛) 充满电量！"] },
                 { id: "choice", keywords: ["帮我选", "吃什么"], action: "thinking", replies: [] }
             ]
         };
 
-        // --- 视觉引擎 ---
+        /**
+         * ⚡️ 高性能状态策略表 (State Strategies)
+         * 将几何计算逻辑从循环中抽离，通过查表调用，避免巨大的 switch/if-else
+         * 参数: p (粒子), i (索引), env (全局环境数据: time, mouseX, mouseY)
+         */
+        const STATE_STRATEGIES = {
+            // 1. 基础 & 身体部位
+            idle: (p, i, env) => {
+                const angle = i; const r = 70 + Math.sin(env.time + i/20) * 5;
+                return { tx: 175 + Math.cos(angle)*r, ty: 175 + Math.sin(angle)*r };
+            },
+            arms_open: (p, i, env) => { // 伸手
+                if (i < 80) return { tx: 115 - (i%40)*2, ty: 175 - Math.sin(i/10 + env.time)*10, color: "#2ecc71" };
+                if (i < 160) return { tx: 235 + (i%40)*2, ty: 175 - Math.sin(i/10 + env.time)*10, color: "#2ecc71" };
+                const angle = i; const r = 60; return { tx: 175 + Math.cos(angle)*r, ty: 175 + Math.sin(angle)*r, color: "#2ecc71" };
+            },
+            wave_hand: (p, i, env) => { // 挥手
+                if (i < 50) {
+                    const waveSpeed = env.time * 8;
+                    const handX = 240 + Math.cos(waveSpeed) * 30;
+                    const handY = 150 + Math.sin(waveSpeed) * 30 - Math.abs(Math.sin(waveSpeed)*15);
+                    return { tx: handX + (Math.random()-0.5)*15, ty: handY + (Math.random()-0.5)*15, color: "#ffffff", loose: false };
+                }
+                const angle = i; const r = 65; return { tx: 175 + Math.cos(angle)*r, ty: 175 + Math.sin(angle)*r };
+            },
+            salute: (p, i, env) => { // 敬礼
+                if (i < 40) return { tx: 210 + (Math.random()-0.5)*20, ty: 130 + (Math.random()-0.5)*10, color: "#ffffff", loose: false };
+                const angle = i; return { tx: 175 + Math.cos(angle)*60, ty: 185 + Math.sin(angle)*70, color: "#34495e" };
+            },
+            open_eyes: (p, i, env) => { // 睁眼
+                if (i < 20) return { tx: 145 + Math.cos(i)*5, ty: 155 + Math.sin(i)*5, color: "#ffffff", loose: false };
+                if (i < 40) return { tx: 205 + Math.cos(i)*5, ty: 155 + Math.sin(i)*5, color: "#ffffff", loose: false };
+                const angle = i; const r = 75; return { tx: 175 + Math.cos(angle)*r, ty: 175 + Math.sin(angle)*r };
+            },
+            jump_ball: (p, i, env) => { // 跳跃
+                const bounce = Math.abs(Math.sin(env.time * 6)) * 150;
+                const r = 35; const angle = i;
+                return { tx: 175 + Math.cos(angle)*r, ty: 280 - bounce + Math.sin(angle)*r, color: "#f1c40f", speed: 0.2, loose: false };
+            },
+            // 2. 形状变换
+            heart: (p, i, env) => {
+                const t = (i/CONFIG.particleCount)*Math.PI*2; const r = 8;
+                return {
+                    tx: 175 + r*(16*Math.pow(Math.sin(t),3)),
+                    ty: 165 - r*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)),
+                    color: "#e91e63", loose: false
+                };
+            },
+            clock: (p, i, env) => {
+                if (i < 20) return { tx: 175, ty: 175 - i*3, color: "white" };
+                if (i < 50) return { tx: 175 + (i-20)*3, ty: 175, color: "white" };
+                const r = 90; return { tx: 175 + Math.cos(i)*r, ty: 175 + Math.sin(i)*r };
+            },
+            cat_ears: (p, i, env) => {
+                if (i < 60) return { tx: 125-(i%20)*2, ty: 115-(i%20)*3, color: "#ffb8b8" };
+                if (i < 120) return { tx: 225+(i%20)*2, ty: 115-(i%20)*3, color: "#ffb8b8" };
+                const angle = i; const r = 65; return { tx: 175 + Math.cos(angle)*r, ty: 185 + Math.sin(angle)*r, color: "#ffb8b8" };
+            },
+            // 3. 特效类
+            explode: (p, i, env) => ({ tx: 175 + (Math.random()-0.5)*800, ty: 175 + (Math.random()-0.5)*800, color: "#ff3838", speed: 0.5, loose: false }),
+            glitch: (p, i, env) => ({ tx: Math.random()*350, ty: Math.random()*350, color: Math.random()>0.8 ? "#fff" : p.color, loose: false }),
+            freeze: (p, i, env) => ({ tx: p.x, ty: p.y, color: "#95a5a6", speed: 0 }),
+            shy_spin: (p, i, env) => {
+                const angle = i + env.time * 3; const r = 80;
+                return { tx: 175 + Math.cos(angle)*r, ty: 175 + Math.sin(angle)*r, color: "#ff9ff3", loose: false };
+            },
+            shy: (p, i, env) => {
+                const angle = i; const r = 80;
+                return { tx: 175 + Math.cos(angle)*r, ty: 175 + Math.sin(angle)*r, color: "#ff9ff3", loose: false };
+            },
+            disco: (p, i, env) => {
+                const hue = (env.time * 100) % 360;
+                const r = 70 + (Math.sin(env.time*10) > 0.5 ? 30 : 0);
+                return { tx: 175 + Math.cos(i+env.time)*r, ty: 175 + Math.sin(i+env.time)*r, color: `hsl(${hue}, 100%, 50%)` };
+            },
+            // 4. 状态类
+            doc_mode: (p, i, env) => {
+                const cols = 20; const row = Math.floor(i / cols); const col = i % cols;
+                return { tx: 105 + col * 7, ty: 105 + row * 7, color: "#ffffff", loose: false };
+            },
+            sleep: (p, i, env) => ({ tx: 175 + (i - CONFIG.particleCount/2), ty: 275, color: "#7f8c8d", speed: 0.05 }),
+            expand: (p, i, env) => { const angle = i; const r = 150; return { tx: 175 + Math.cos(angle)*r, ty: 175 + Math.sin(angle)*r, color: "#8e44ad" }; },
+            shiver: (p, i, env) => {
+                const angle = i; const r = 40;
+                return { tx: 175 + Math.cos(angle)*r + (Math.random()-0.5)*15, ty: 175 + Math.sin(angle)*r + (Math.random()-0.5)*15, color: "#bdc3c7", loose: false };
+            },
+            scatter_recycle: (p, i, env) => ({ tx: 175 + (Math.random()-0.5)*100, ty: 400 }),
+            stand_proud: (p, i, env) => {
+                if(i<60) return { tx: 150, ty: 290+(i%15)*4, color: "#9b59b6" };
+                if(i<120) return { tx: 200, ty: 290+(i%15)*4, color: "#9b59b6" };
+                return { tx: 175 + Math.cos(i)*65, ty: 190 + Math.sin(i)*65, color: "#9b59b6" };
+            },
+            stand_serious: (p, i, env) => {
+                if(i<60) return { tx: 150, ty: 290+(i%15)*4, color: "#34495e" };
+                if(i<120) return { tx: 200, ty: 290+(i%15)*4, color: "#34495e" };
+                return { tx: 175 + Math.cos(i)*65, ty: 190 + Math.sin(i)*65, color: "#34495e" };
+            },
+            attack: (p, i, env) => {
+                const angle = i; const r = 70+(i%5)*10;
+                return { tx: 175 + Math.cos(angle)*r + (Math.random()-0.5)*10, ty: 175 + Math.sin(angle)*r + (Math.random()-0.5)*10, color: "#e74c3c", loose: false };
+            },
+            gold_mode: (p, i, env) => { const angle=i; const r=80; return { tx: 175+Math.cos(angle)*r, ty: 175+Math.sin(angle)*r, color: "#ffd700" }; },
+            dark_mode: (p, i, env) => { const angle=i; const r=50; return { tx: 175+Math.cos(angle)*r, ty: 175+Math.sin(angle)*r, color: "#333333" }; },
+            comfort: (p, i, env) => { const angle=i; const r=120; return { tx: 175+Math.cos(angle)*r, ty: 175+Math.sin(angle)*r, color: "#fab1a0" }; },
+            thinking: (p, i, env) => { const angle=i+env.time*2; const r=40; return { tx: 175+Math.cos(angle)*r, ty: 175+Math.sin(angle)*r, color: "#0984e3" }; },
+            universe: (p, i, env) => { const angle=i*0.1+env.time*0.5; const r=i*0.4; return { tx: 175+Math.cos(angle)*r, ty: 175+Math.sin(angle)*r, color: "#8e44ad" }; },
+            coin_flip: (p, i, env) => { const r=60; const s=Math.cos(env.time*10); return { tx: 175+Math.cos(i)*r*s, ty: 175+Math.sin(i)*r, color: "#f1c40f" }; },
+            morph_shape: (p, i, env) => { const r=50+Math.sin(env.time*5)*20; const angle=i+env.time; return { tx: 175+Math.cos(angle*3)*r, ty: 175+Math.sin(angle)*r, color: `hsl(${i%360},70%,60%)` }; },
+            flow: (p, i, env) => { return { tx: (i/CONFIG.particleCount)*400, ty: 175+Math.sin((i/CONFIG.particleCount)*400/50 + env.time)*50, color: "#00d2ff" }; },
+            scatter_flat: (p, i, env) => { return { tx: (i/CONFIG.particleCount)*350, ty: 175+Math.sin((i/CONFIG.particleCount)*350/20 + env.time)*20, loose: false }; },
+            dissolve: (p, i, env) => {
+                if(i%2===0) return { tx: p.x+Math.random()*2, ty: p.y-Math.random()*2, color: `rgba(255,255,255,${Math.random()})`, loose: false };
+                const angle=i; const r=60; return { tx: 175+Math.cos(angle)*r, ty: 175+Math.sin(angle)*r, color: `rgba(255,255,255,${Math.random()})`, loose: false };
+            }
+        };
+
+        /**
+         * =================================================================
+         * MODULE 2: VISUAL ENGINE (视觉层 - 优化版)
+         * =================================================================
+         */
         class VisualEngine {
             constructor(canvasId) {
                 this.canvas = document.getElementById(canvasId);
                 this.ctx = this.canvas.getContext('2d');
                 this.width = 350; this.height = 350;
                 this.canvas.width = this.width; this.canvas.height = this.height;
-                this.particles = []; this.mouseX = -1000; this.mouseY = -1000; 
-                this.state = "idle"; 
-                this.time = 0;
                 
-                // 新增：说话时的呼吸开关
-                this.isBreathing = false; 
+                this.particles = [];
+                this.mouseX = -1000; this.mouseY = -1000;
+                this.state = "idle";
+                this.time = 0;
+                this.isBreathing = false;
 
-                this.initParticles(); this.bindEvents(); this.animate();
+                this.initParticles();
+                this.bindEvents();
+                this.animate();
             }
-            initParticles() { for (let i = 0; i < CONFIG.particleCount; i++) { this.particles.push({x: this.width/2, y: this.height/2, vx: 0, vy: 0, baseX: this.width/2 + (Math.random()-0.5)*50, baseY: this.height/2 + (Math.random()-0.5)*50, size: Math.random()*2+1, color: CONFIG.defaultColor, speed: Math.random()*0.05+0.02, friction: 0.92}); } }
+
+            initParticles() {
+                for (let i = 0; i < CONFIG.particleCount; i++) {
+                    this.particles.push({
+                        x: this.width/2, y: this.height/2, vx: 0, vy: 0,
+                        baseX: this.width/2 + (Math.random()-0.5)*50,
+                        baseY: this.height/2 + (Math.random()-0.5)*50,
+                        size: Math.random() * 2 + 1,
+                        color: CONFIG.defaultColor,
+                        speed: Math.random() * 0.05 + 0.02,
+                        friction: 0.92
+                    });
+                }
+            }
+
             bindEvents() {
-                const updateMouse = (x, y) => { const rect = this.canvas.getBoundingClientRect(); this.mouseX = x - rect.left; this.mouseY = y - rect.top; };
+                const updateMouse = (x, y) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.mouseX = x - rect.left;
+                    this.mouseY = y - rect.top;
+                };
                 document.addEventListener('mousemove', (e) => updateMouse(e.clientX, e.clientY));
                 document.addEventListener('touchmove', (e) => updateMouse(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
             }
-            setState(newState) { this.state = newState; this.particles.forEach(p => p.color = CONFIG.defaultColor); }
-            
-            // 新增：设置呼吸状态
+
+            setState(newState) { this.state = newState; }
             setBreathing(flag) { this.isBreathing = flag; }
 
+            // *** 核心优化循环 ***
             updateParticles() {
                 this.time += 0.05;
-                this.particles.forEach((p, i) => {
-                    let tx, ty, loose = true, speedOverride = null, targetColor = p.color;
+                
+                // 获取当前状态的计算函数，默认 idle
+                const strategy = STATE_STRATEGIES[this.state] || STATE_STRATEGIES.idle;
+                
+                // 预封装环境数据
+                const env = { time: this.time, mouseX: this.mouseX, mouseY: this.mouseY };
+
+                // 呼吸因子 (0 ~ 0.06)
+                const breathScale = this.isBreathing ? (1 + Math.sin(this.time * 8) * 0.06) : 1;
+
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p = this.particles[i];
                     
-                    // --- 状态计算 (和之前一样) ---
-                    if (this.state === "idle") { const angle = i; const r = 70 + Math.sin(this.time + i/20) * 5; tx = 175 + Math.cos(angle) * r; ty = 175 + Math.sin(angle) * r; }
-                    else if (this.state === "arms_open") { if (i < 80) { tx = 115 - (i % 40) * 2; ty = 175 - Math.sin(i/10 + this.time)*10; } else if (i < 160) { tx = 235 + (i % 40) * 2; ty = 175 - Math.sin(i/10 + this.time)*10; } else { const angle = i; const r = 60; tx = 175 + Math.cos(angle)*r; ty = 175 + Math.sin(angle)*r; } targetColor = "#2ecc71"; }
-                    else if (this.state === "clock") { const r = 90; tx = 175 + Math.cos(i) * r; ty = 175 + Math.sin(i) * r; if (i < 20) { tx = 175; ty = 175 - i*3; targetColor="white";} if (i > 20 && i < 50) { tx = 175 + (i-20)*3; ty = 175; targetColor="white";} }
-                    else if (this.state === "gold_mode") { const angle=i; const r=80; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#ffd700"; }
-                    else if (this.state === "dark_mode") { const angle=i; const r=50; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#333333"; }
-                    else if (this.state === "attack") { const angle=i; const r=70+(i%5)*10; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#e74c3c"; loose=false; tx+=(Math.random()-0.5)*10; ty+=(Math.random()-0.5)*10; }
-                    else if (this.state === "explode") { tx = 175 + (Math.random()-0.5)*800; ty = 175 + (Math.random()-0.5)*800; loose = false; speedOverride = 0.5; targetColor = "#ff3838"; }
-                    else if (this.state === "doc_mode") { const cols = 20; const row = Math.floor(i / cols); const col = i % cols; tx = 105 + col * 7; ty = 105 + row * 7; loose = false; targetColor = "#ffffff"; }
-                    else if (this.state === "cat_ears") { if (i < 60) { tx = 125 - (i%20)*2; ty = 115 - (i%20)*3; } else if (i < 120) { tx = 225 + (i%20)*2; ty = 115 - (i%20)*3; } else { const angle = i; const r = 65; tx = 175 + Math.cos(angle)*r; ty = 185 + Math.sin(angle)*r; } targetColor = "#ffb8b8"; }
-                    else if (this.state === "disco") { const hue = (this.time * 100) % 360; targetColor = `hsl(${hue}, 100%, 50%)`; const beat = Math.sin(this.time * 10); const r = 70 + (beat > 0.5 ? 30 : 0); tx = 175 + Math.cos(i + this.time)*r; ty = 175 + Math.sin(i + this.time)*r; }
-                    else if (this.state === "heart") { const t = (i/CONFIG.particleCount)*Math.PI*2; const r = 8; tx = 175 + r*(16*Math.pow(Math.sin(t),3)); ty = 165 - r*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)); targetColor = "#e91e63"; loose = false; }
-                    else if (this.state === "shy" || this.state === "shy_spin") { const angle = i + (this.state.includes("spin")?this.time*3:0); const r = 80; tx = 175 + Math.cos(angle) * r; ty = 175 + Math.sin(angle) * r; targetColor = "#ff9ff3"; loose = false; }
-                    else if (this.state === "sleep") { tx=175+(i-CONFIG.particleCount/2); ty=275; speedOverride=0.05; targetColor="#7f8c8d"; }
-                    else if (this.state === "expand") { const angle=i; const r=150; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#8e44ad"; }
-                    else if (this.state === "shiver") { const angle=i; const r=40; tx=175+Math.cos(angle)*r+(Math.random()-0.5)*15; ty=175+Math.sin(angle)*r+(Math.random()-0.5)*15; targetColor="#bdc3c7"; loose=false; }
-                    else if (this.state === "glitch") { tx=Math.random()*350; ty=Math.random()*350; loose=false; if(Math.random()>0.8) targetColor="#fff"; }
-                    else if (this.state === "freeze") { tx=p.x; ty=p.y; speedOverride=0; targetColor="#95a5a6"; }
-                    else if (this.state === "scatter_flat") { tx = (i / CONFIG.particleCount) * 350; ty = 175 + Math.sin(tx/20 + this.time)*20; loose=false; }
-                    else if (this.state === "dissolve") { if(i%2===0){tx=p.x+Math.random()*2;ty=p.y-Math.random()*2}else{const angle=i;const r=60;tx=175+Math.cos(angle)*r;ty=175+Math.sin(angle)*r} loose=false; targetColor=`rgba(255,255,255,${Math.random()})`; }
-                    else if (this.state === "coin_flip") { const r = 60; const scale = Math.cos(this.time * 10); tx = 175 + Math.cos(i) * r * scale; ty = 175 + Math.sin(i) * r; targetColor = "#f1c40f"; }
-                    else if (this.state === "morph_shape") { const r = 50 + Math.sin(this.time * 5) * 20; const angle = i + this.time; tx = 175 + Math.cos(angle * 3) * r; ty = 175 + Math.sin(angle) * r; targetColor = `hsl(${i % 360}, 70%, 60%)`; }
-                    else if (this.state === "flow") { tx = (i / CONFIG.particleCount) * 400; ty = 175 + Math.sin(tx/50 + this.time) * 50; targetColor = "#00d2ff"; }
-                    else if (this.state === "stand_proud" || this.state === "stand_serious") { if(i<60){ tx=150; ty=290+(i%15)*4; } else if(i<120){ tx=200; ty=290+(i%15)*4; } else { tx=175+Math.cos(i)*65; ty=190+Math.sin(i)*65; } targetColor = this.state === "stand_proud" ? "#9b59b6" : "#34495e"; }
-                    else if (this.state === "scatter_recycle") { tx = 175 + (Math.random()-0.5)*100; ty = 400; }
-                    else if (this.state === "comfort") { const angle=i; const r=120; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#fab1a0"; }
-                    else if (this.state === "thinking") { const angle=i+this.time*2; const r=40; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#0984e3"; }
-                    else if (this.state === "universe") { const angle=i*0.1+this.time*0.5; const r=i*0.4; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; targetColor="#8e44ad"; }
-                        else if (this.state === "wave_hand") {
-                        // 前 50 个粒子组成一只手
-                        if (i < 50) { 
-                            // 手臂摆动逻辑：以身体右侧为圆心，做扇形运动
-                            const waveSpeed = this.time * 8;
-                            const handX = 240 + Math.cos(waveSpeed) * 30; // 左右摆
-                            const handY = 150 + Math.sin(waveSpeed) * 30 - Math.abs(Math.sin(waveSpeed)*15); // 上下摆
-                            
-                            // 让粒子在手的位置聚集，稍微有点散布
-                            tx = handX + (Math.random()-0.5) * 15;
-                            ty = handY + (Math.random()-0.5) * 15;
-                            targetColor = "#ffffff"; // 手是亮白色的
-                            loose = false;
-                        } else {
-                            // 剩下的粒子保持身体不动
-                            const angle = i; const r = 65;
-                            tx = 175 + Math.cos(angle)*r; 
-                            ty = 175 + Math.sin(angle)*r;
-                        }
+                    // 1. 获取目标位置 (Strategy Pattern)
+                    let res = strategy(p, i, env);
+                    
+                    // 默认值填充
+                    if (!res.color) res.color = p.color;
+                    if (res.loose === undefined) res.loose = true;
+                    if (res.speed === undefined) res.speed = p.speed;
+
+                    // 2. 应用呼吸效果 (全局缩放)
+                    if (this.isBreathing && res.loose) {
+                        res.tx = 175 + (res.tx - 175) * breathScale;
+                        res.ty = 175 + (res.ty - 175) * breathScale;
                     }
 
-                    // === 🆕 新增：跳跃 (变成球上下动) ===
-                    else if (this.state === "jump_ball") {
-                        // 1. 变成紧凑的球 (半径变小 r=35)
-                        const r = 35;
-                        // 2. 整体上下跳动 (bounce)
-                        // Math.abs(Math.sin) 让它像弹力球一样只在地面上方跳
-                        const bounceHeight = Math.abs(Math.sin(this.time * 6)) * 150; 
-                        
-                        const angle = i;
-                        // x 保持中心，y 随跳动变化 (基准线 280 是地面)
-                        tx = 175 + Math.cos(angle) * r;
-                        ty = 280 - bounceHeight + Math.sin(angle) * r;
-                        
-                        targetColor = "#f1c40f"; // 变成金球
-                        speedOverride = 0.2; // 动作要快！
-                        loose = false; // 结构紧凑
+                    // 3. 物理计算 (减少闭包和重复引用)
+                    const dx_m = p.x - this.mouseX;
+                    const dy_m = p.y - this.mouseY;
+                    
+                    // 简单的距离检查，避免 sqrt 开方 (使用平方比较)
+                    const distSq_m = dx_m * dx_m + dy_m * dy_m;
+                    
+                    if (distSq_m < 6400) { // 80*80
+                        const dist_m = Math.sqrt(distSq_m);
+                        const force = (80 - dist_m) / 80;
+                        const ang = Math.atan2(dy_m, dx_m);
+                        p.vx += Math.cos(ang) * force * 2;
+                        p.vy += Math.sin(ang) * force * 2;
                     }
 
-                    // === 🆕 新增：敬礼 (一只手对着头) ===
-                    else if (this.state === "salute") {
-                        // 前 40 个粒子组成手，放在额头位置 (右上角)
-                        if (i < 40) {
-                            // 额头位置大约在 (210, 130)
-                            tx = 210 + (Math.random()-0.5) * 20;
-                            ty = 130 + (Math.random()-0.5) * 10; // 扁平一点，像手掌
-                            targetColor = "#ffffff";
-                            loose = false;
-                        } else {
-                            // 身体站得直直的 (椭圆)
-                            const angle = i; 
-                            tx = 175 + Math.cos(angle) * 60;
-                            ty = 185 + Math.sin(angle) * 70; // 拉长一点显高
-                            targetColor = "#34495e"; // 严肃深蓝
-                        }
+                    const dx = res.tx - p.x;
+                    const dy = res.ty - p.y;
+                    
+                    p.vx += dx * res.speed;
+                    p.vy += dy * res.speed;
+
+                    if (res.loose && this.state !== "freeze") {
+                        p.vx += (Math.random() - 0.5) * 1.5;
+                        p.vy += (Math.random() - 0.5) * 1.5;
                     }
 
-                    // === 🆕 新增：睁眼 (圆球中上显示两个对称点) ===
-                    else if (this.state === "open_eyes") {
-                        // 左眼 (前20个粒子)
-                        if (i < 20) {
-                            tx = 145 + Math.cos(i) * 5; // x: 175-30
-                            ty = 155 + Math.sin(i) * 5; // y: 偏上
-                            targetColor = "#ffffff"; // 亮眼
-                            loose = false;
-                        } 
-                        // 右眼 (20-40个粒子)
-                        else if (i >= 20 && i < 40) {
-                            tx = 205 + Math.cos(i) * 5; // x: 175+30
-                            ty = 155 + Math.sin(i) * 5;
-                            targetColor = "#ffffff";
-                            loose = false;
-                        }
-                        // 身体 (其余粒子)
-                        else {
-                            const angle = i; const r = 75;
-                            tx = 175 + Math.cos(angle) * r;
-                            ty = 175 + Math.sin(angle) * r;
-                        }
-                    }
-                    else { const angle=i; const r=70; tx=175+Math.cos(angle)*r; ty=175+Math.sin(angle)*r; }
-
-                    // *** 新增：说话时的呼吸特效 (Breathing Effect) ***
-                    // 如果正在说话，整体根据中心(175,175)进行缩放
-                    if (this.isBreathing && loose) {
-                        const breathScale = 1 + Math.sin(this.time * 8) * 0.06; // 呼吸幅度
-                        tx = 175 + (tx - 175) * breathScale;
-                        ty = 175 + (ty - 175) * breathScale;
-                    }
-
-                    // --- 物理计算 ---
-                    const dx_m = p.x - this.mouseX; const dy_m = p.y - this.mouseY; const dist_m = Math.sqrt(dx_m*dx_m + dy_m*dy_m);
-                    if (dist_m < 80) { const force = (80 - dist_m) / 80; const ang = Math.atan2(dy_m, dx_m); p.vx += Math.cos(ang) * force * 2; p.vy += Math.sin(ang) * force * 2; }
-                    const dx = tx - p.x; const dy = ty - p.y; const s = speedOverride !== null ? speedOverride : p.speed;
-                    p.vx += dx * s; p.vy += dy * s; if (loose && this.state !== "freeze") { p.vx += (Math.random()-0.5)*1.5; p.vy += (Math.random()-0.5)*1.5; }
-                    p.vx *= p.friction; p.vy *= p.friction; p.x += p.vx; p.y += p.vy; p.color = targetColor;
-                });
+                    p.vx *= p.friction;
+                    p.vy *= p.friction;
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.color = res.color;
+                }
             }
-            draw() { this.ctx.clearRect(0, 0, this.width, this.height); this.particles.forEach(p => { this.ctx.fillStyle = p.color; this.ctx.beginPath(); this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); this.ctx.fill(); }); }
+
+            draw() {
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                for (let i = 0; i < this.particles.length; i++) {
+                    const p = this.particles[i];
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+            }
+
             animate() { this.updateParticles(); this.draw(); requestAnimationFrame(this.animate.bind(this)); }
         }
 
-        // --- 逻辑层 ---
+        /**
+         * =================================================================
+         * MODULE 3: BRAIN (逻辑层 - 优化版)
+         * =================================================================
+         */
         class Brain {
             constructor(visualEngine) {
                 this.visual = visualEngine;
@@ -306,21 +366,25 @@
                 this.loopTimer = null;
                 this.synth = window.speechSynthesis;
                 this.selectedVoice = null;
+                this.voiceEnabled = true;
                 
-                // 语音开关 (默认开启)
-                this.voiceEnabled = true; 
-                
+                // *** 优化：预构建关键词索引 (Flattened Index) ***
+                this.keywordIndex = [];
+                CONFIG.scenarios.forEach(scenario => {
+                    scenario.keywords.forEach(kw => {
+                        this.keywordIndex.push({ keyword: kw, scenario: scenario });
+                    });
+                });
+
                 this.initVoiceSystem();
                 this.bindControls();
             }
 
             bindControls() {
-                // 绑定静音按钮
                 const muteBtn = document.getElementById('mute-btn');
                 muteBtn.addEventListener('click', () => {
                     this.voiceEnabled = !this.voiceEnabled;
                     muteBtn.innerText = this.voiceEnabled ? "🔊" : "🔇";
-                    // 如果关闭时正在说话，立即停止
                     if (!this.voiceEnabled && this.synth) this.synth.cancel();
                 });
             }
@@ -331,16 +395,17 @@
                     const voices = this.synth.getVoices().filter(v => v.lang.includes('zh') || v.lang.includes('CN'));
                     const select = document.getElementById('voice-select');
                     select.innerHTML = '';
-                    if (voices.length === 0) { select.innerHTML = '<option>默认语音 (无其他选项)</option>'; return; }
-                    voices.forEach((v, index) => { const option = document.createElement('option'); option.textContent = `${v.name} (${v.lang})`; option.value = index; select.appendChild(option); });
+                    if (voices.length === 0) { select.innerHTML = '<option>默认语音</option>'; return; }
+                    voices.forEach((v, index) => { const opt = document.createElement('option'); opt.text = v.name; opt.value = index; select.add(opt); });
                     this.selectedVoice = voices[0];
-                    select.addEventListener('change', (e) => { this.selectedVoice = voices[e.target.value]; });
+                    select.onchange = (e) => { this.selectedVoice = voices[e.target.value]; };
                 };
                 populateVoices();
                 if (this.synth.onvoiceschanged !== undefined) this.synth.onvoiceschanged = populateVoices;
+                
                 const panel = document.getElementById('voice-panel');
-                document.getElementById('setting-btn').addEventListener('click', () => panel.classList.add('open'));
-                document.getElementById('close-panel').addEventListener('click', () => panel.classList.remove('open'));
+                document.getElementById('setting-btn').onclick = () => panel.classList.add('open');
+                document.getElementById('close-panel').onclick = () => panel.classList.remove('open');
             }
 
             think(text) {
@@ -348,67 +413,69 @@
                 if (cleanText.includes("什么意思")) { this.triggerInfiniteLoop(); return; }
                 if (this.checkTimeLogic(cleanText)) return;
 
-                const scenario = CONFIG.scenarios.find(s => s.keywords.some(k => cleanText.includes(k)));
-                if (scenario) {
-                    this.execute(scenario);
+                // *** 优化：单次遍历 ***
+                const match = this.keywordIndex.find(item => cleanText.includes(item.keyword));
+                
+                if (match) {
+                    this.execute(match.scenario);
                 } else {
-                    const randomReply = CONFIG.fallbackReplies[Math.floor(Math.random() * CONFIG.fallbackReplies.length)];
-                    this.speak(randomReply, "confused");
+                    const reply = CONFIG.fallbackReplies[Math.floor(Math.random() * CONFIG.fallbackReplies.length)];
+                    this.speak(reply, "confused");
                 }
             }
 
             checkTimeLogic(text) {
-                const hour = new Date().getHours();
-                if (text.includes("早") || text.includes("morning")) { 
-                    if (hour < 9) { this.speak(CONFIG.timeResponses.morning_early.text, CONFIG.timeResponses.morning_early.action); return true; }
-                    else { this.speak(CONFIG.timeResponses.morning_late.text, CONFIG.timeResponses.morning_late.action); return true; }
+                const h = new Date().getHours();
+                if (text.includes("早") || text.includes("morning")) {
+                    const res = (h < 9) ? CONFIG.timeResponses.morning_early : CONFIG.timeResponses.morning_late;
+                    this.speak(res.text, res.action); return true;
                 }
-                if (text.includes("晚安") || text.includes("睡了")) { this.speak(CONFIG.timeResponses.night.text, CONFIG.timeResponses.night.action); return true; }
-                if (text.includes("几点了") || text.includes("时间")) { 
-                    const timeStr = new Date().toLocaleTimeString(); 
-                    this.speak(CONFIG.timeResponses.ask_time.text.replace("{time}", timeStr), CONFIG.timeResponses.ask_time.action); return true; 
+                if (text.includes("晚安") || text.includes("睡了")) {
+                    this.speak(CONFIG.timeResponses.night.text, CONFIG.timeResponses.night.action); return true;
                 }
-                if (hour >= 2 && hour < 5 && !text.includes("晚安")) { this.speak(CONFIG.timeResponses.late_night_scold.text, CONFIG.timeResponses.late_night_scold.action); return true; }
+                if (text.includes("几点") || text.includes("时间")) {
+                    this.speak(CONFIG.timeResponses.ask_time.text.replace("{time}", new Date().toLocaleTimeString()), "clock"); return true;
+                }
+                if (h >= 2 && h < 5 && !text.includes("晚安")) {
+                    this.speak(CONFIG.timeResponses.late_night_scold.text, "attack"); return true;
+                }
                 return false;
             }
 
             execute(scenario) {
-                let replyText = "";
-                if (scenario.id === "rps") { const opts = ["石头", "剪刀", "布"]; replyText = `我出 ${opts[Math.floor(Math.random()*3)]}！`; }
-                else if (scenario.id === "coin") { replyText = `结果是... ${Math.random() > 0.5 ? "正面" : "反面"}。`; }
-                else if (scenario.id === "choice") { replyText = `建议选 ${Math.random() > 0.5 ? "前一个" : "后一个"}。`; }
-                else { replyText = scenario.replies[Math.floor(Math.random() * scenario.replies.length)]; }
-
-                this.speak(replyText, scenario.action);
+                let reply = "";
+                // 动态逻辑依然保留
+                if (scenario.id === "rps") { reply = `我出 ${["石头","剪刀","布"][Math.floor(Math.random()*3)]}！`; }
+                else if (scenario.id === "coin") { reply = `结果是... ${Math.random()>0.5?"正面":"反面"}。`; }
+                else if (scenario.id === "choice") { reply = `建议选 ${Math.random()>0.5?"前一个":"后一个"}。`; }
+                else { reply = scenario.replies[Math.floor(Math.random() * scenario.replies.length)]; }
+                
+                this.speak(reply, scenario.action);
                 if (scenario.id === "explode") setTimeout(() => this.visual.setState("idle"), 4000);
             }
 
             speak(text, visualState) {
                 if (this.loopTimer) { clearInterval(this.loopTimer); this.loopTimer = null; }
+                
                 this.visual.setState(visualState);
                 if (this.bubbleTimer) clearTimeout(this.bubbleTimer);
                 
-                this.bubble.innerText = text; 
-                this.bubble.classList.add('visible');
-                
-                // 开启呼吸特效
+                this.bubble.innerText = text; this.bubble.classList.add('visible');
                 this.visual.setBreathing(true);
 
-                // 只有在语音开关开启时才发声
                 if (this.voiceEnabled && this.synth) {
                     this.synth.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    if (this.selectedVoice) utterance.voice = this.selectedVoice;
-                    utterance.rate = 1.0;
-                    this.synth.speak(utterance);
+                    const utt = new SpeechSynthesisUtterance(text);
+                    if (this.selectedVoice) utt.voice = this.selectedVoice;
+                    this.synth.speak(utt);
                 }
 
-                const duration = Math.max(3000, text.length * 200);
+                const dur = Math.max(3000, text.length * 200);
                 this.bubbleTimer = setTimeout(() => {
                     this.bubble.classList.remove('visible');
-                    this.visual.setBreathing(false); // 停止呼吸
+                    this.visual.setBreathing(false);
                     if (!["doc_mode", "sleep", "dark_mode"].includes(visualState)) this.visual.setState("idle");
-                }, duration);
+                }, dur);
             }
 
             triggerInfiniteLoop() {
@@ -416,8 +483,7 @@
                 let count = 0; this.visual.setState("glitch");
                 this.loopTimer = setInterval(() => {
                     count++;
-                    const variants = ["什么意思？", "什么意思！", "意思什么？", "啊？？"];
-                    const txt = variants[count % 4] + "\n".repeat(count % 3) + variants[(count+1)%4];
+                    const txt = ["什么意思？", "什么意思！", "意思什么？", "啊？？"][count % 4] + "\n".repeat(count % 3);
                     this.bubble.innerText = txt; this.bubble.classList.add("visible");
                     if (count > 25) {
                         clearInterval(this.loopTimer); this.loopTimer = null;
@@ -428,13 +494,11 @@
             }
         }
 
-        // --- 启动层 ---
+        // --- Init ---
         const visual = new VisualEngine('main-canvas');
         const brain = new Brain(visual);
 
-        document.body.addEventListener('click', () => {
-            if (window.speechSynthesis) window.speechSynthesis.speak(new SpeechSynthesisUtterance(" "));
-        }, { once: true });
+        document.body.addEventListener('click', () => { if (window.speechSynthesis) window.speechSynthesis.speak(new SpeechSynthesisUtterance(" ")); }, { once: true });
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const micBtn = document.getElementById('mic-btn');
@@ -445,7 +509,7 @@
             recognition.lang = 'zh-CN'; recognition.continuous = false;
             recognition.onstart = () => { micBtn.classList.add('active'); statusText.innerText = "正在聆听..."; };
             recognition.onend = () => { micBtn.classList.remove('active'); statusText.innerText = "点击麦克风唤醒"; };
-            recognition.onresult = (event) => { brain.think(event.results[0][0].transcript); };
+            recognition.onresult = (e) => { brain.think(e.results[0][0].transcript); };
             micBtn.onclick = () => { try { recognition.start(); } catch(e) { recognition.stop(); } };
         } else {
             statusText.innerText = "浏览器不支持语音"; micBtn.style.display = "none";
