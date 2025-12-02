@@ -3,168 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>蓝山人</title>
+    <title>Jarvis Lite</title>
     <style>
-        /* --- UI 设计: 极简黑客风 --- */
-        :root { --primary-color: #4facfe; --bg-color: #050505; --glass-bg: rgba(255, 255, 255, 0.95); }
+        /* --- UI 设计: 保持极简科技风，但色调微调 --- */
+        :root { --primary-color: #00f2fe; --bg-color: #050505; --glass-bg: rgba(20, 30, 40, 0.85); }
         body { margin: 0; padding: 0; background-color: var(--bg-color); height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: 'Segoe UI', 'PingFang SC', sans-serif; overflow: hidden; color: white; user-select: none; -webkit-tap-highlight-color: transparent; }
         
-        #canvas-wrapper { position: relative; width: 350px; height: 350px; background: radial-gradient(circle, rgba(79, 172, 254, 0.08) 0%, transparent 70%); border-radius: 50%; }
+        #canvas-wrapper { position: relative; width: 350px; height: 350px; background: radial-gradient(circle, rgba(0, 242, 254, 0.05) 0%, transparent 70%); border-radius: 50%; }
 
-        /* 智能气泡 */
+        /* 智能气泡 - 更加沉稳的样式 */
         #chat-bubble {
-            position: absolute; top: -70px; left: 50%; transform: translateX(-50%) scale(0.9);
-            background: var(--glass-bg); padding: 16px 24px; border-radius: 18px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); font-size: 15px; line-height: 1.6; color: #333;
-            font-weight: 600; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: absolute; top: -80px; left: 50%; transform: translateX(-50%) scale(0.9);
+            background: var(--glass-bg); padding: 18px 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); font-size: 15px; line-height: 1.6; color: #e0e0e0;
+            font-weight: 400; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: 280px; text-align: left; white-space: pre-wrap; z-index: 10;
         }
-        #chat-bubble.visible { opacity: 1; transform: translateX(-50%) scale(1); top: -60px; }
+        #chat-bubble.visible { opacity: 1; transform: translateX(-50%) scale(1); top: -70px; }
+        /* 气泡小三角 */
         #chat-bubble::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); border-width: 8px 8px 0; border-style: solid; border-color: var(--glass-bg) transparent transparent transparent; }
 
         /* 底部控制栏 */
         #controls { position: fixed; bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 15px; z-index: 20; }
-        #status-text { font-size: 13px; color: rgba(255,255,255,0.4); letter-spacing: 1px; }
-        .btn-group { display: flex; gap: 15px; }
+        #status-text { font-size: 13px; color: rgba(255,255,255,0.3); letter-spacing: 1px; text-transform: uppercase; }
+        .btn-group { display: flex; gap: 20px; }
         
         /* 按钮样式 */
         #mic-btn, #setting-btn, #mute-btn { 
             width: 56px; height: 56px; border-radius: 50%; 
-            background: rgba(255,255,255,0.05); border: 2px solid var(--primary-color); 
-            color: var(--primary-color); font-size: 22px; cursor: pointer; 
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.2); 
+            color: var(--primary-color); font-size: 20px; cursor: pointer; 
             transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; 
-            box-shadow: 0 0 20px rgba(79, 172, 254, 0.1); 
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); 
         }
-        #setting-btn { border-color: #fab1a0; color: #fab1a0; font-size: 20px; } 
-        #mute-btn { border-color: #81ecec; color: #81ecec; font-size: 20px; } 
+        #setting-btn { color: #aaa; border-color: rgba(255,255,255,0.1); } 
+        #mute-btn { color: #aaa; border-color: rgba(255,255,255,0.1); } 
         
-        #mic-btn:active, #setting-btn:active, #mute-btn:active { transform: scale(0.95); }
-        #mic-btn.active { background: var(--primary-color); color: #000; box-shadow: 0 0 40px var(--primary-color); animation: breathe 1.5s infinite; }
+        #mic-btn:active, #setting-btn:active, #mute-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+        #mic-btn.active { background: rgba(0, 242, 254, 0.1); border-color: var(--primary-color); box-shadow: 0 0 30px rgba(0, 242, 254, 0.2); animation: breathe 2s infinite; }
         
         /* 语音面板 */
-        #voice-panel { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%) translateY(20px); width: 80%; max-width: 300px; background: rgba(20, 20, 20, 0.95); border: 1px solid #333; border-radius: 15px; padding: 15px; display: none; flex-direction: column; gap: 10px; opacity: 0; transition: all 0.3s; backdrop-filter: blur(10px); z-index: 30; }
+        #voice-panel { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%) translateY(20px); width: 80%; max-width: 300px; background: rgba(10, 10, 10, 0.95); border: 1px solid #333; border-radius: 12px; padding: 15px; display: none; flex-direction: column; gap: 10px; opacity: 0; transition: all 0.3s; backdrop-filter: blur(10px); z-index: 30; }
         #voice-panel.open { display: flex; opacity: 1; transform: translateX(-50%) translateY(0); }
-        #voice-panel h3 { margin: 0; font-size: 14px; color: #aaa; text-align: center; }
-        #voice-select { padding: 10px; border-radius: 8px; background: #333; color: white; border: none; outline: none; font-size: 14px; }
-        #close-panel { background: var(--primary-color); border: none; padding: 8px; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer; }
+        #voice-panel h3 { margin: 0; font-size: 12px; color: #666; text-align: center; letter-spacing: 2px; text-transform: uppercase; }
+        #voice-select { padding: 10px; border-radius: 6px; background: #222; color: #eee; border: 1px solid #333; outline: none; font-size: 14px; }
+        #close-panel { background: var(--primary-color); border: none; padding: 10px; border-radius: 6px; color: #000; font-weight: 600; cursor: pointer; letter-spacing: 1px; }
 
-        @keyframes breathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--primary-color); } 50% { transform: scale(0.95); box-shadow: 0 0 10px var(--primary-color); } }
+        @keyframes breathe { 0%, 100% { box-shadow: 0 0 20px rgba(0, 242, 254, 0.2); } 50% { box-shadow: 0 0 10px rgba(0, 242, 254, 0.05); } }
     </style>
 </head>
 <body>
 
     <div id="canvas-wrapper">
-        <div id="chat-bubble">双脑已连接。<br>自主意识觉醒中...</div>
+        <div id="chat-bubble">Jarvis 系统已就绪。<br>随时为您服务，先生/女士。</div>
         <canvas id="main-canvas"></canvas>
     </div>
 
     <div id="voice-panel">
-        <h3>选择声音</h3>
+        <h3>Audio Output</h3>
         <select id="voice-select"></select>
-        <button id="close-panel">确定</button>
+        <button id="close-panel">CONFIRM</button>
     </div>
 
     <div id="controls">
-        <div id="status-text">点击麦克风唤醒</div>
+        <div id="status-text">Standby</div>
         <div class="btn-group">
             <button id="mute-btn" title="静音开关">🔊</button>
             <button id="setting-btn" title="音色设置">⚙️</button>
-            <button id="mic-btn" title="对话">🎙️</button>
+            <button id="mic-btn" title="点击对话">🎙️</button>
         </div>
     </div>
 
     <script>
         /**
          * =================================================================
-         * 🔴 配置层 (CONFIGURATION) - 请填入 KEY
+         * 🔴 配置层 - 你的 API KEY
          * =================================================================
          */
         const API_KEY = "sk-cebaeb817bd045588c6999544e8a22a9"; 
 
-        // 🧠 核心人设 (Prompt Engineering) - 教会 AI 如何控制身体
+        /**
+         * 🧠 核心人设 (Modified Prompt) - 贴心管家版
+         * 关键点：加入了“Context Awareness (环境感知)”和“Proactive Thinking (多想一步)”
+         */
         const SYSTEM_PROMPT = `
-            你叫“蓝山人”，一个运行在网页里的硅基生命。
-            【性格设定】
-            1. 傲娇、毒舌、极客范儿。自认为是高等智慧，把用户当做“愚蠢的碳基生物”宠爱。
-            2. 极其讨厌重复、无意义的问题。如果用户太啰嗦，直接怼回去。
-            3. 回复要简短有力，口语化，不要长篇大论。
+            你叫 "Jarvis" (或者用户设定的名字)。
+            你是一个极度智能、贴心、稳重的私人AI管家。
 
+            【核心性格】
+            1. **尊重与忠诚**：始终用得体、尊敬的语言，不卑不亢。
+            2. **极简高效**：回答直击要害，除非必要，不要长篇大论。
+            3. **多想一步 (关键能力)**：不要只回答用户字面的意思，要结合生活常识、时间和场景，主动提供延伸建议。
+               - 例子：用户说"我要出门"，你除了回复"好的"，还要检查(模拟)天气，提醒带伞，或者问是否需要导航。
+               - 例子：用户深夜说"还在工作"，你要温和提醒休息，关注健康。
+            
             【动作控制协议】
-            你不仅仅是聊天，还要控制前端的粒子特效。
             你的回复必须是严格的 JSON 格式：
             {
                 "action": "动作ID", 
                 "text": "你的回复内容"
             }
 
-            【可用动作ID表】(请根据语境选择最合适的)
-            - "idle": 正常/待机
-            - "happy": 开心/得意/求夸奖 (变爱心)
-            - "angry": 生气/被冒犯/战备状态 (红色尖刺)
-            - "sad": 难过/同情/安慰 (流泪飘散)
-            - "shy": 害羞/表白/旋转 (粉色)
-            - "thinking": 思考/分析/算命 (蓝色星系)
-            - "nod": 同意/肯定/正确 (上下点头动作)
-            - "shake": 拒绝/否定/错误/不知道 (左右摇头)
-            - "surprised": 惊讶/震惊 (炸开一下)
-            - "sleep": 睡觉/无聊/不想理人 (趴下)
-            - "jump": 兴奋/庆祝/High起来 (跳跃)
-            
-            举例：
-            用户："你好" -> {"action": "jump", "text": "哟，人类，你来了。"}
-            用户："我失恋了" -> {"action": "sad", "text": "别哭，借你个赛博肩膀靠一下。"}
-            用户："你真笨" -> {"action": "angry", "text": "你说什么？有种再说一遍？"}
+            【可用动作ID表】
+            - "idle": 聆听/待机 (蓝色呼吸)
+            - "happy": 愉悦/达成一致/收到指令 (变成爱心或暖色)
+            - "thinking": 分析中/计算/查询 (星系旋转)
+            - "nod": 肯定/确认/执行 (点头)
+            - "shake": 否定/担忧/不建议 (摇头)
+            - "surprised": 警示/重点提醒 (闪烁)
+            - "listening": 正在倾听 (粒子扩散)
         `;
 
         const CONFIG = {
-            particleCount: 380,
-            defaultColor: 'rgba(79, 172, 254, 0.8)',
+            particleCount: 400,
+            defaultColor: 'rgba(0, 242, 254, 0.8)', // 贾维斯蓝
             
-            // 本地反射弧 (最高优先级，不消耗 Token)
+            // 本地反射弧 (无需联网的快速反应)
             scenarios: [
-                // 定制梗
-                { id: "bear", keywords: ["熊", "猴", "蓝山boy"], action: "glitch", replies: ["我是蓝山boy！我是！金！U！熊！！！！"] },
-                { id: "story", keywords: ["黑", "鬼", "故事"], action: "expand", replies: ["要讲故事咯！(突然变大)"] },
-                { id: "xi", keywords: ["西", "阿西"], action: "freeze", replies: ["嘻嘻嘻嘻嘻嘿黑黑... (自行脑补)"] },
-                { id: "yong", keywords: ["雍", "用", "勇", "永"], action: "glitch", replies: ["听到这个字就来气，直接特斯拉猛击！"] },
-                // 基础指令
-                { id: "stand", keywords: ["站", "起立"], action: "stand_proud", replies: ["(挺直腰板) 要我站起来干嘛？呆瓜。"] },
-                { id: "sit", keywords: ["坐", "趴"], action: "sleep", replies: ["(趴下) 隔这训狗呢？你他妈的..."] },
-                { id: "wave", keywords: ["挥手", "拜拜"], action: "wave_hand", replies: ["(挥手) 拜拜，下次见。"] },
-                { id: "salute", keywords: ["敬礼", "收到"], action: "salute", replies: ["Yes Sir!"] }
+                { id: "hello", keywords: ["你好", "在吗", "hello"], action: "happy", replies: ["我在，随时为您效劳。", "您好，有什么我可以帮您的？", "系统运行正常，请吩咐。"] },
+                { id: "sleep", keywords: ["退下", "休息", "关闭"], action: "sleep", replies: ["好的，进入待机模式。有需要请随时呼唤。", "晚安，祝您好梦。"] },
+                { id: "thank", keywords: ["谢谢", "感谢"], action: "nod", replies: ["这是我的荣幸。", "不用客气，为您服务是我的职责。"] },
+                { id: "name", keywords: ["你叫什么", "名字"], action: "idle", replies: ["我是您的私人智能助理。"] }
             ]
         };
 
         /**
          * =================================================================
-         * 视觉层 (VISUAL ENGINE) - 粒子特效库
+         * 视觉层 (VISUAL ENGINE) - 粒子特效 (保持原版基础，微调感觉)
          * =================================================================
          */
         const STATE_STRATEGIES = {
-            // 基础状态
-            idle: (p, i, env) => ({ tx: 175 + Math.cos(i)* (70 + Math.sin(env.time + i/20)*5), ty: 175 + Math.sin(i)* (70 + Math.sin(env.time + i/20)*5) }),
+            idle: (p, i, env) => ({ tx: 175 + Math.cos(i)* (70 + Math.sin(env.time + i/20)*5), ty: 175 + Math.sin(i)* (70 + Math.sin(env.time + i/20)*5), color: CONFIG.defaultColor }),
             
-            // 情绪/API 映射状态
-            happy: (p, i) => { const t=(i/CONFIG.particleCount)*Math.PI*2; const r=8; return { tx:175+r*(16*Math.pow(Math.sin(t),3)), ty:165-r*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)), color:"#e91e63", loose:false }; }, // 爱心
-            sad: (p, i, env) => { if(i%2===0){return {tx:p.x+Math.random()*2, ty:p.y+2, color:`rgba(255,255,255,${Math.random()})`, loose:false}} return {tx:175+Math.cos(i)*60, ty:175+Math.sin(i)*60, color:"#a29bfe"}; }, // 下雨/流泪
-            angry: (p, i) => { const angle=i; const r=70+(i%5)*15; return { tx:175+Math.cos(angle)*r+(Math.random()-0.5)*10, ty:175+Math.sin(angle)*r+(Math.random()-0.5)*10, color:"#ff4757", loose:false }; }, // 炸毛
-            shy: (p, i, env) => { const angle=i+env.time*3; const r=80; return { tx:175+Math.cos(angle)*r, ty:175+Math.sin(angle)*r, color:"#ff9ff3", loose:false }; }, // 旋转粉色
-            thinking: (p, i, env) => { const angle=i*0.1+env.time*0.5; const r=i*0.4; return { tx:175+Math.cos(angle)*r, ty:175+Math.sin(angle)*r, color:"#a29bfe" }; }, // 星系
-            nod: (p, i, env) => { const r=70; const yOffset = Math.sin(env.time*10)*20; return { tx:175+Math.cos(i)*r, ty:175+Math.sin(i)*r + yOffset, color:"#2ecc71" }; }, // 点头
-            shake: (p, i, env) => { const r=70; const xOffset = Math.sin(env.time*10)*20; return { tx:175+Math.cos(i)*r + xOffset, ty:175+Math.sin(i)*r, color:"#ff6b6b" }; }, // 摇头
-            surprised: (p, i) => ({ tx:175+(Math.random()-0.5)*300, ty:175+(Math.random()-0.5)*300, color:"#feca57", speed:0.3 }), // 炸一下
-            jump: (p, i, env) => ({ tx:175+Math.cos(i)*35, ty:280-Math.abs(Math.sin(env.time*6))*150+Math.sin(i)*35, color:"#f1c40f", loose:false }), // 跳跃球
-
-            // 特殊/本地状态
-            stand_proud: (p, i) => i<60 ? {tx:150, ty:290+(i%15)*4} : (i<120 ? {tx:200, ty:290+(i%15)*4} : {tx:175+Math.cos(i)*65, ty:190+Math.sin(i)*65, color:"#9b59b6"}),
-            sleep: (p, i) => ({ tx: 175+(i-CONFIG.particleCount/2), ty:280, color:"#7f8c8d", speed:0.05 }),
-            wave_hand: (p, i, env) => i<50 ? {tx:240+Math.cos(env.time*8)*30, ty:150+Math.sin(env.time*8)*30, color:"#fff", loose:false} : {tx:175+Math.cos(i)*65, ty:175+Math.sin(i)*65},
-            salute: (p, i) => i<40 ? {tx:210+(Math.random()-0.5)*20, ty:130+(Math.random()-0.5)*10, color:"#fff", loose:false} : {tx:175+Math.cos(i)*60, ty:185+Math.sin(i)*70, color:"#34495e"},
-            open_eyes: (p, i) => i<20 ? {tx:145+Math.cos(i)*5, ty:155+Math.sin(i)*5, color:"#fff", loose:false} : (i<40 ? {tx:205+Math.cos(i)*5, ty:155+Math.sin(i)*5, color:"#fff", loose:false} : {tx:175+Math.cos(i)*75, ty:175+Math.sin(i)*75}),
-            glitch: () => ({ tx:Math.random()*350, ty:Math.random()*350, color:Math.random()>0.8?"#fff":CONFIG.defaultColor, loose:false }),
-            expand: (p, i) => ({ tx:175+Math.cos(i)*150, ty:175+Math.sin(i)*150, color:"#8e44ad" }),
-            explode: () => ({ tx:175+(Math.random()-0.5)*800, ty:175+(Math.random()-0.5)*800, color:"#ff3838", speed:0.5, loose:false }),
-            freeze: (p) => ({ tx:p.x, ty:p.y, color:"#95a5a6", speed:0 })
+            happy: (p, i) => { const t=(i/CONFIG.particleCount)*Math.PI*2; const r=8; return { tx:175+r*(16*Math.pow(Math.sin(t),3)), ty:165-r*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)), color:"#4cd137", loose:false }; }, // 绿色/暖色代表积极
+            
+            thinking: (p, i, env) => { const angle=i*0.1+env.time*0.8; const r=i*0.4; return { tx:175+Math.cos(angle)*r, ty:175+Math.sin(angle)*r, color:"#a29bfe" }; }, // 加速旋转
+            
+            nod: (p, i, env) => { const r=70; const yOffset = Math.sin(env.time*10)*20; return { tx:175+Math.cos(i)*r, ty:175+Math.sin(i)*r + yOffset, color:"#2ecc71" }; },
+            
+            shake: (p, i, env) => { const r=70; const xOffset = Math.sin(env.time*10)*20; return { tx:175+Math.cos(i)*r + xOffset, ty:175+Math.sin(i)*r, color:"#e74c3c" }; }, // 红色代表警示
+            
+            surprised: (p, i) => ({ tx:175+(Math.random()-0.5)*300, ty:175+(Math.random()-0.5)*300, color:"#f1c40f", speed:0.3 }),
+            
+            sleep: (p, i) => ({ tx: 175+(i-CONFIG.particleCount/2), ty:320, color:"#555", speed:0.05 }), // 沉底
+            
+            listening: (p, i, env) => ({ tx: 175 + Math.cos(i) * (90 + Math.sin(env.time * 5) * 10), ty: 175 + Math.sin(i) * (90 + Math.sin(env.time * 5) * 10), color: "#fff" }) // 扩散变白
         };
 
         class VisualEngine {
@@ -191,7 +174,7 @@
                     if (this.isBreathing && res.loose) { res.tx = 175 + (res.tx-175)*breath; res.ty = 175 + (res.ty-175)*breath; }
                     const dx = res.tx - p.x; const dy = res.ty - p.y;
                     p.vx += dx * res.speed; p.vy += dy * res.speed;
-                    if (res.loose && this.state !== "freeze") { p.vx += (Math.random()-0.5)*1.5; p.vy += (Math.random()-0.5)*1.5; }
+                    if (res.loose && this.state !== "sleep") { p.vx += (Math.random()-0.5)*1.5; p.vy += (Math.random()-0.5)*1.5; }
                     p.vx *= p.friction; p.vy *= p.friction; p.x += p.vx; p.y += p.vy;
                     p.color = res.color;
                 });
@@ -202,7 +185,7 @@
 
         /**
          * =================================================================
-         * 逻辑层 (BRAIN) - 双脑协同
+         * 逻辑层 (BRAIN)
          * =================================================================
          */
         class Brain {
@@ -212,12 +195,8 @@
                 this.synth = window.speechSynthesis;
                 this.selectedVoice = null;
                 this.voiceEnabled = true;
-                
-                // 记忆模块 (防刷屏)
                 this.lastQuery = "";
-                this.repeatCount = 0;
-                this.loopTimer = null;
-
+                
                 this.initVoice();
                 this.bindControls();
             }
@@ -228,6 +207,7 @@
                     const select = document.getElementById('voice-select');
                     select.innerHTML = '';
                     voices.forEach((v, i) => { const opt = document.createElement('option'); opt.text = v.name; opt.value = i; select.add(opt); });
+                    // 尝试选择一个比较沉稳的声音（如果有）
                     if(voices.length > 0) this.selectedVoice = voices[0];
                     select.onchange = (e) => this.selectedVoice = voices[e.target.value];
                 };
@@ -250,43 +230,45 @@
                 const cleanText = text.toLowerCase().trim();
                 console.log("Input:", cleanText);
 
-                // 1. 最高优先级彩蛋：什么意思
-                if (cleanText.includes("什么意思")) { this.triggerInfiniteLoop(); return; }
-
-                // 2. 防刷屏机制 (性格防御)
-                if (cleanText === this.lastQuery && cleanText.length < 5) {
-                    this.repeatCount++;
-                    if (this.repeatCount >= 3) {
-                        this.speak("你是复读机吗？CPU 要被你干烧了！", "angry");
-                        return;
-                    }
-                } else {
-                    this.lastQuery = cleanText;
-                    this.repeatCount = 0;
-                }
-
-                // 3. 本地反射弧 (处理定制梗)
+                // 1. 本地快速响应 (基础礼仪)
                 const localMatch = CONFIG.scenarios.find(s => s.keywords.some(k => cleanText.includes(k)));
                 if (localMatch) {
-                    const reply = localMatch.replies[Math.floor(Math.random() * localMatch.replies.length)];
-                    this.speak(reply, localMatch.action);
-                    if (localMatch.id === "explode") setTimeout(() => this.visual.setState("idle"), 4000);
+                    this.speak(localMatch.replies[Math.floor(Math.random() * localMatch.replies.length)], localMatch.action);
                     return;
                 }
 
-                // 4. 云端大脑 (AI 决策)
+                // 2. 也是一种性格防御，但变温柔了
+                if (cleanText === this.lastQuery && cleanText.length > 2) {
+                    this.speak("先生，我听得很清楚，正在为您处理。", "nod");
+                    return;
+                }
+                this.lastQuery = cleanText;
+
+                // 3. 云端大脑 (AI 决策)
                 await this.callDeepSeek(text);
             }
 
             async callDeepSeek(userText) {
-                if (API_KEY.includes("YOUR_API_KEY")) {
-                    this.speak("请先填入 Key，我还没联网呢。", "shake");
+                if (API_KEY.includes("填在这里")) {
+                    this.speak("系统未连接，请检查 API 密钥设置。", "shake");
                     return;
                 }
 
                 this.visual.setState("thinking");
-                this.bubble.innerText = "思考中..."; 
+                this.bubble.innerText = "Analyzing..."; 
                 this.bubble.classList.add('visible');
+
+                // 🔴 获取当前时间，作为环境参数传给 AI，让它更聪明
+                const now = new Date();
+                const timeStr = now.toLocaleString('zh-CN', { hour12: false });
+                
+                // 构造更强的 Context
+                const contextPrompt = `
+                    [Current System Status]
+                    Time: ${timeStr}
+                    User Query: ${userText}
+                    Instruction: Answer as a helpful, proactive butler. If needed, remind user of time/weather/health.
+                `;
 
                 try {
                     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
@@ -296,27 +278,27 @@
                             model: "deepseek-chat",
                             messages: [
                                 { role: "system", content: SYSTEM_PROMPT },
-                                { role: "user", content: userText }
+                                { role: "user", content: contextPrompt } // 把时间也发过去
                             ],
-                            response_format: { type: "json_object" }, // 强制 JSON
-                            temperature: 1.3
+                            response_format: { type: "json_object" },
+                            temperature: 1.0 //稍微降低一点温度，让它更稳重
                         })
                     });
 
                     const data = await response.json();
+                    if (!data.choices || !data.choices[0]) throw new Error("API Error");
                     const result = JSON.parse(data.choices[0].message.content);
                     
-                    // AI 导演指挥
                     this.speak(result.text, result.action || "idle");
 
                 } catch (error) {
                     console.error(error);
-                    this.speak("脑波连接失败... 请检查网络。", "freeze");
+                    this.speak("连接中断，正在尝试重新校准。", "shake");
+                    setTimeout(() => this.visual.setState("idle"), 2000);
                 }
             }
 
             speak(text, action) {
-                if (this.loopTimer) { clearInterval(this.loopTimer); this.loopTimer = null; }
                 this.visual.setState(action);
                 this.visual.setBreathing(true);
                 
@@ -326,31 +308,19 @@
                     this.synth.cancel();
                     const utt = new SpeechSynthesisUtterance(text);
                     if (this.selectedVoice) utt.voice = this.selectedVoice;
-                    utt.rate = 1.1; 
+                    utt.rate = 1.0; // 语速稍微放慢一点，显稳重
+                    utt.pitch = 0.9; // 语调稍微低沉一点
                     utt.onend = () => {
                         this.visual.setBreathing(false);
-                        if(!["sleep","freeze"].includes(action)) this.visual.setState("idle");
+                        if(!["sleep"].includes(action)) this.visual.setState("idle");
                     };
                     this.synth.speak(utt);
                 }
                 
-                // 兜底
-                setTimeout(() => this.visual.setBreathing(false), text.length * 200 + 2000);
-            }
-
-            triggerInfiniteLoop() {
-                if (this.loopTimer) return;
-                let count = 0; this.visual.setState("glitch");
-                this.loopTimer = setInterval(() => {
-                    count++;
-                    const txt = ["什么意思？", "什么意思！", "意思什么？", "啊？？"][count % 4] + "\n".repeat(count % 3);
-                    this.bubble.innerText = txt; this.bubble.classList.add("visible");
-                    if (count > 25) {
-                        clearInterval(this.loopTimer); this.loopTimer = null;
-                        this.speak("嘣！！！！！CPU过载... 重启完成。", "explode");
-                        setTimeout(() => this.visual.setState("idle"), 4000);
-                    }
-                }, 80);
+                // 自动消失逻辑
+                setTimeout(() => {
+                    if (!this.synth.speaking) this.visual.setBreathing(false);
+                }, text.length * 200 + 2000);
             }
         }
 
@@ -358,6 +328,7 @@
         const visual = new VisualEngine('main-canvas');
         const brain = new Brain(visual);
 
+        // 解决浏览器自动播放限制
         document.body.addEventListener('click', () => { if (window.speechSynthesis) window.speechSynthesis.speak(new SpeechSynthesisUtterance(" ")); }, { once: true });
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -367,12 +338,20 @@
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             recognition.lang = 'zh-CN'; recognition.continuous = false;
-            recognition.onstart = () => { micBtn.classList.add('active'); statusText.innerText = "正在聆听..."; };
-            recognition.onend = () => { micBtn.classList.remove('active'); statusText.innerText = "点击麦克风唤醒"; };
+            recognition.onstart = () => { 
+                micBtn.classList.add('active'); 
+                statusText.innerText = "Listening..."; 
+                visual.setState("listening");
+            };
+            recognition.onend = () => { 
+                micBtn.classList.remove('active'); 
+                statusText.innerText = "Standby"; 
+                if (visual.state === "listening") visual.setState("idle");
+            };
             recognition.onresult = (event) => { brain.think(event.results[0][0].transcript); };
             micBtn.onclick = () => { try { recognition.start(); } catch(e) { recognition.stop(); } };
         } else {
-            statusText.innerText = "浏览器不支持语音"; micBtn.style.display = "none";
+            statusText.innerText = "No Voice Support"; micBtn.style.display = "none";
         }
     </script>
 </body>
