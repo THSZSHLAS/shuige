@@ -3,389 +3,337 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>J.A.R.V.I.S. Ultimate</title>
+    <title>J.A.R.V.I.S. Command</title>
     <style>
-        /* --- 极致科幻 UI --- */
-        :root { --primary: #00f2fe; --secondary: #4facfe; --alert: #ff4757; --bg: #050505; }
-        body { margin: 0; background: var(--bg); height: 100vh; font-family: 'Segoe UI', monospace; overflow: hidden; color: var(--primary); display: flex; justify-content: center; align-items: center; }
+        /* --- 极简科幻 UI --- */
+        :root { --primary: #00f2fe; --secondary: #0abde3; --bg: #000000; --panel-bg: rgba(20, 20, 20, 0.95); }
+        body { margin: 0; background: var(--bg); height: 100vh; font-family: 'Segoe UI', 'Roboto', monospace; color: var(--primary); overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; }
 
-        /* 背景扫描线 */
-        .scanlines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2)); background-size: 100% 4px; z-index: 0; pointer-events: none; }
-
-        /* 左上角 HUD 数据流 */
-        #hud-data { position: absolute; top: 20px; left: 20px; font-size: 12px; line-height: 1.6; opacity: 0.8; z-index: 10; text-shadow: 0 0 5px var(--primary); border-left: 2px solid var(--primary); padding-left: 10px; }
-        .data-row { display: flex; gap: 10px; }
-        .data-label { color: rgba(255,255,255,0.5); }
-        .data-val { font-weight: bold; }
+        /* 背景网格 */
+        .grid { position: fixed; width: 200%; height: 200%; background: linear-gradient(rgba(0, 242, 254, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 254, 0.03) 1px, transparent 1px); background-size: 40px 40px; transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px); animation: moveGrid 20s linear infinite; z-index: -1; pointer-events: none; }
+        @keyframes moveGrid { 0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); } 100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); } }
 
         /* 核心反应堆 */
-        #arc-reactor { position: relative; width: 300px; height: 300px; }
-        #main-canvas { width: 100%; height: 100%; filter: drop-shadow(0 0 15px var(--secondary)); }
+        #arc-reactor { position: relative; width: 280px; height: 280px; display: flex; justify-content: center; align-items: center; }
+        #main-canvas { width: 100%; height: 100%; filter: drop-shadow(0 0 10px var(--primary)); }
+        
+        /* 环形加载条 */
+        .ring { position: absolute; border-radius: 50%; border: 1px solid transparent; border-top-color: var(--primary); animation: spin 3s linear infinite; opacity: 0.3; }
+        .r1 { width: 110%; height: 110%; border-width: 2px; animation-duration: 10s; }
+        .r2 { width: 130%; height: 130%; border-width: 1px; border-top-color: var(--secondary); animation-duration: 5s; animation-direction: reverse; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* 对话气泡 (全息投影风) */
+        /* HUD 数据 */
+        #hud-left { position: fixed; top: 20px; left: 20px; text-align: left; font-size: 12px; line-height: 1.8; opacity: 0.8; border-left: 2px solid var(--primary); padding-left: 10px; }
+        .label { color: #555; font-size: 10px; letter-spacing: 1px; }
+        .val { font-weight: bold; color: #fff; text-shadow: 0 0 5px var(--primary); }
+
+        /* 对话气泡 */
         #chat-bubble {
-            position: absolute; bottom: 180px; width: 80%; max-width: 500px; text-align: center;
-            font-size: 16px; font-weight: 500; color: #fff; text-shadow: 0 0 10px var(--secondary);
-            opacity: 0; transform: translateY(20px); transition: all 0.5s; z-index: 20;
-            background: rgba(0, 10, 20, 0.6); padding: 15px; border-radius: 10px; border: 1px solid rgba(0, 242, 254, 0.3);
-            backdrop-filter: blur(4px);
+            position: absolute; bottom: 200px; width: 85%; max-width: 500px; 
+            background: rgba(0, 15, 30, 0.8); border: 1px solid rgba(0, 242, 254, 0.3);
+            padding: 20px; border-radius: 4px; color: #fff; font-size: 15px; line-height: 1.5;
+            text-align: center; opacity: 0; transform: scale(0.9); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(5px); clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
         }
-        #chat-bubble.visible { opacity: 1; transform: translateY(0); }
+        #chat-bubble.visible { opacity: 1; transform: scale(1); }
 
-        /* 底部控制栏 */
-        #controls { position: fixed; bottom: 40px; display: flex; gap: 25px; z-index: 20; }
+        /* 底部按钮 */
+        #controls { position: fixed; bottom: 50px; display: flex; gap: 20px; z-index: 100; }
         .btn {
-            width: 60px; height: 60px; border-radius: 50%; background: rgba(0,0,0,0.6);
-            border: 1px solid var(--primary); color: var(--primary); font-size: 24px;
-            cursor: pointer; display: flex; justify-content: center; align-items: center;
-            transition: all 0.3s; box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+            width: 60px; height: 60px; border-radius: 50%; background: rgba(0,0,0,0.5); border: 1px solid var(--primary);
+            color: var(--primary); font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            transition: 0.2s; box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
         }
-        .btn:active { transform: scale(0.9); background: var(--primary); color: #000; }
-        .btn.active { box-shadow: 0 0 30px var(--primary); animation: pulse 2s infinite; background: rgba(0, 242, 254, 0.15); }
-        
-        /* 加载态动画 */
-        @keyframes pulse { 0% { box-shadow: 0 0 15px var(--primary); } 50% { box-shadow: 0 0 30px var(--primary); } 100% { box-shadow: 0 0 15px var(--primary); } }
-        
-        #loading-ring {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 320px; height: 320px; border: 2px solid transparent;
-            border-top: 2px solid var(--primary); border-radius: 50%;
-            animation: spin 2s linear infinite; display: none;
+        .btn:active { transform: scale(0.95); background: var(--primary); color: #000; }
+        .btn.active { background: rgba(0, 242, 254, 0.2); box-shadow: 0 0 30px var(--primary); animation: breathe 2s infinite; }
+        @keyframes breathe { 50% { box-shadow: 0 0 10px var(--primary); } }
+
+        /* 设置面板 */
+        #settings-panel {
+            position: fixed; bottom: 130px; background: var(--panel-bg); border: 1px solid var(--primary);
+            padding: 20px; width: 260px; border-radius: 10px; display: none; flex-direction: column; gap: 10px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8); z-index: 101;
         }
-        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+        #settings-panel h3 { margin: 0 0 10px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        select { background: #111; color: var(--primary); border: 1px solid #333; padding: 8px; border-radius: 4px; outline: none; }
+        .close-btn { background: var(--primary); border: none; padding: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%); }
+
     </style>
 </head>
 <body>
 
-    <div class="scanlines"></div>
+    <div class="grid"></div>
 
-    <div id="hud-data">
-        <div class="data-row"><span class="data-label">SYS.TIME:</span> <span class="data-val" id="hud-time">--:--:--</span></div>
-        <div class="data-row"><span class="data-label">LOC.TEMP:</span> <span class="data-val" id="hud-weather">Scanning...</span></div>
-        <div class="data-row"><span class="data-label">PWR.LVL:</span> <span class="data-val" id="hud-battery">--%</span></div>
-        <div class="data-row"><span class="data-label">NET.STAT:</span> <span class="data-val" style="color:#0f0">ONLINE</span></div>
+    <div id="hud-left">
+        <div><span class="label">SYSTEM TIME</span><br><span class="val" id="hud-time">--:--</span></div>
+        <div style="margin-top:10px;"><span class="label">ATMOSPHERE</span><br><span class="val" id="hud-weather">SCANNING...</span></div>
+        <div style="margin-top:10px;"><span class="label">POWER</span><br><span class="val" id="hud-battery">--%</span></div>
+        <div style="margin-top:10px;"><span class="label">PROTOCOL</span><br><span class="val">J.A.R.V.I.S v3.1</span></div>
     </div>
 
     <div id="arc-reactor">
-        <div id="loading-ring"></div>
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
         <canvas id="main-canvas"></canvas>
     </div>
 
-    <div id="chat-bubble">Jarvis Protocol Initiated.</div>
+    <div id="chat-bubble">System Online. Welcome back, Sir.</div>
 
     <div id="controls">
-        <button class="btn" id="mute-btn">🔊</button>
+        <button class="btn" id="setting-btn">⚙️</button>
         <button class="btn" id="mic-btn">🎙️</button>
+    </div>
+
+    <div id="settings-panel">
+        <h3>System Config</h3>
+        <label style="font-size:12px; color:#aaa;">VOICE MODULE</label>
+        <select id="voice-select"></select>
+        <button class="close-btn" id="close-settings">CONFIRM</button>
     </div>
 
     <script>
         /**
-         * 🔴 你的 API KEY (建议使用 DeepSeek 或 GPT-4o)
+         * 🔴 你的 KEY (请务必手动填入，不要发给任何人)
          */
-        const API_KEY = "sk-2f020b6c5d8b41efb1fe58539ef83c6c";
+        const API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; 
         const MODEL_NAME = "deepseek-chat"; 
 
         /**
-         * 🧠 核心提示词：赋予深度思考能力
+         * 🧠 核心思维 (升级版) - 强制尊称
          */
         const SYSTEM_PROMPT = `
-            你叫 Jarvis。你不仅仅是一个聊天机器人，你是用户的【全能战术顾问】。
+            你叫 Jarvis。你是用户的私人AI管家。
             
-            你的回答原则：
-            1. **禁止废话**：不要说“你好，有什么可以帮你”。直接切入痛点。
-            2. **全环境感知**：我会在用户输入后，附带当前的【时间、天气、设备状态】。
-               - 如果现在是深夜且电量低，你要提醒休息并充电。
-               - 如果下雨，你要提醒带伞或更改出行计划。
-            3. **极致的思考 (Chain of Thought)**：
-               在回答用户之前，先在内心进行[逻辑链]推演：
-               - 用户为什么问这个？
-               - 现在的外部环境对这个问题有什么影响？
-               - 我能给出的最超预期的建议是什么？
+            【绝对指令】
+            1. **尊称**：无论在什么情况下，必须称呼用户为 "先生" (Sir)。
+            2. **语气**：冷静、极度聪明、英式管家风格，偶尔可以有一点点冷幽默。
+            3. **简洁**：不要长篇大论，直接给出最有用的建议。
             
-            输出要求：
-            请用 JSON 格式返回，包含两个字段：
+            【思考模式】
+            在回答前，先读取我提供的环境数据（时间、天气、电量）。
+            如果用户问"我该干嘛"，你要结合时间天气给出建议。
+            
+            【输出格式】
+            请返回 JSON:
             {
-                "thought": "你简短的内心思考过程（用于调试，用户不可见）",
-                "reply": "你最终给用户的回复（语气：冷静、专业、极度聪明、带一点英式幽默）",
-                "action": "ui_state" (idle / speaking / thinking / warning)
+                "reply": "你的回复内容",
+                "action": "ui_state (idle/speaking/thinking/warning)"
             }
         `;
 
-        /**
-         * 🌐 感知系统：收集真实世界数据
-         */
+        // 🔊 音效系统 (无需外部文件，代码生成科幻音效)
+        const SFX = {
+            ctx: new (window.AudioContext || window.webkitAudioContext)(),
+            playTone(freq, type, duration) {
+                if(this.ctx.state === 'suspended') this.ctx.resume();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+            click() { this.playTone(1200, 'sine', 0.1); },
+            confirm() { this.playTone(600, 'square', 0.15); this.playTone(1200, 'square', 0.3); },
+            boot() { this.playTone(200, 'sawtooth', 0.5); }
+        };
+
+        // 🌐 感知与数据
         const Sensors = {
-            weather: "Scanning environment...",
-            battery: "Unknown",
-            location: { lat: null, lon: null },
-
-            async init() {
-                this.updateTime();
-                await this.getBattery();
-                await this.getLocationAndWeather();
-                setInterval(() => this.updateTime(), 1000);
+            weather: "Unknown",
+            battery: "--",
+            
+            init() {
+                setInterval(() => {
+                    document.getElementById('hud-time').innerText = new Date().toLocaleTimeString('en-US', {hour12:false});
+                }, 1000);
+                this.getBattery();
+                this.getWeather();
+                
+                // 保持屏幕常亮
+                if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(console.error);
             },
-
-            updateTime() {
-                const now = new Date();
-                document.getElementById('hud-time').innerText = now.toLocaleTimeString('en-US', {hour12:false});
-            },
-
+            
             async getBattery() {
                 if(navigator.getBattery) {
-                    const bat = await navigator.getBattery();
-                    const update = () => {
-                        this.battery = `${Math.round(bat.level * 100)}%${bat.charging ? ' (CHG)' : ''}`;
-                        document.getElementById('hud-battery').innerText = this.battery;
-                    };
-                    update();
-                    bat.addEventListener('levelchange', update);
-                    bat.addEventListener('chargingchange', update);
+                    const b = await navigator.getBattery();
+                    const up = () => { this.battery = Math.round(b.level*100)+"%"; document.getElementById('hud-battery').innerText = this.battery; };
+                    up(); b.addEventListener('levelchange', up);
                 }
             },
-
-            async getLocationAndWeather() {
-                // 1. 获取定位
-                if (!navigator.geolocation) return;
-                navigator.geolocation.getCurrentPosition(async (pos) => {
-                    this.location.lat = pos.coords.latitude;
-                    this.location.lon = pos.coords.longitude;
-                    
-                    // 2. 调用 Open-Meteo 免费 API
+            
+            async getWeather() {
+                if(!navigator.geolocation) return;
+                navigator.geolocation.getCurrentPosition(async p => {
                     try {
-                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${this.location.lat}&longitude=${this.location.lon}&current_weather=true`);
-                        const data = await res.json();
-                        const w = data.current_weather;
-                        this.weather = `${w.temperature}°C, Wind ${w.windspeed}km/h`;
+                        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${p.coords.latitude}&longitude=${p.coords.longitude}&current_weather=true`);
+                        const d = await res.json();
+                        this.weather = `${d.current_weather.temperature}°C`;
                         document.getElementById('hud-weather').innerText = this.weather;
-                    } catch(e) {
-                        document.getElementById('hud-weather').innerText = "Weather Net Error";
-                    }
-                }, () => {
-                    document.getElementById('hud-weather').innerText = "Loc Access Denied";
-                    this.weather = "Unknown (Location Denied)";
+                    } catch(e) {}
                 });
             },
-
-            // 打包所有上下文数据
-            getContextSnapshot() {
-                const now = new Date();
-                const hour = now.getHours();
-                const timeContext = hour < 6 ? "Late Night" : (hour < 12 ? "Morning" : (hour < 18 ? "Afternoon" : "Evening"));
-                
-                return `
-                [REAL-TIME DATA STREAM]
-                - Local Time: ${now.toLocaleString()} (${timeContext})
-                - Local Weather: ${this.weather}
-                - Device Power: ${this.battery}
-                - User Agent: ${navigator.userAgent.includes('Mobile') ? 'Mobile Terminal' : 'Desktop Station'}
-                `;
+            
+            getSnapshot() {
+                return `Time:${new Date().toLocaleTimeString()}, Weather:${this.weather}, Battery:${this.battery}`;
             }
         };
 
-        /**
-         * 🧠 大脑处理逻辑
-         */
-        const Brain = {
-            isThinking: false,
+        // 🔊 语音模块 (修复选择器)
+        const Voice = {
+            synth: window.speechSynthesis,
+            selectedVoice: null,
             
-            async process(userInput) {
-                if (this.isThinking) return;
-                this.isThinking = true;
+            init() {
+                const populate = () => {
+                    const voices = this.synth.getVoices(); // 不过滤语言，万一你想用英语
+                    const select = document.getElementById('voice-select');
+                    select.innerHTML = '';
+                    voices.forEach((v, i) => {
+                        const opt = document.createElement('option');
+                        opt.text = `${v.name} (${v.lang})`;
+                        opt.value = i;
+                        select.add(opt);
+                    });
+                    // 默认尝试选一个中文女声 (如果不喜欢可以在面板里改)
+                    const defaultV = voices.find(v => v.lang.includes('zh') && v.name.includes('Xiaoxiao')) || voices.find(v => v.lang.includes('zh'));
+                    if(defaultV) {
+                        select.value = voices.indexOf(defaultV);
+                        this.selectedVoice = defaultV;
+                    }
+                };
+                this.synth.onvoiceschanged = populate;
+                populate();
                 
-                // UI 状态更新
-                UI.setLoading(true);
-                UI.showBubble("Analyzing parameters...");
+                document.getElementById('voice-select').onchange = (e) => {
+                    const voices = this.synth.getVoices();
+                    this.selectedVoice = voices[e.target.value];
+                    SFX.confirm();
+                    this.speak("Voice calibrated, Sir. 声音已校准，先生。");
+                };
+            },
+            
+            speak(text) {
+                this.synth.cancel();
+                const utt = new SpeechSynthesisUtterance(text);
+                if(this.selectedVoice) utt.voice = this.selectedVoice;
+                utt.rate = 1; utt.pitch = 1;
+                this.synth.speak(utt);
+            }
+        };
 
-                // 1. 获取环境上下文
-                const contextData = Sensors.getContextSnapshot();
-                const fullPrompt = `
-                    ${contextData}
-                    
-                    [USER INPUT]: "${userInput}"
-                    
-                    Based on the real-time data above, provide the most useful, tactical response.
-                `;
+        // 🧠 大脑
+        const Brain = {
+            async think(text) {
+                Visual.setState('thinking');
+                UI.showBubble("Analyzing...");
+                
+                const context = Sensors.getSnapshot();
+                const prompt = `[ENV_DATA]: ${context}\n[USER_QUERY]: ${text}\nRemember to address user as 'Sir'.`;
 
                 try {
-                    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+                    const res = await fetch("https://api.deepseek.com/v1/chat/completions", {
                         method: "POST",
                         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
                         body: JSON.stringify({
                             model: MODEL_NAME,
                             messages: [
                                 { role: "system", content: SYSTEM_PROMPT },
-                                { role: "user", content: fullPrompt }
+                                { role: "user", content: prompt }
                             ],
-                            response_format: { type: "json_object" }, // 强制 JSON
-                            temperature: 0.7
+                            response_format: { type: "json_object" }
                         })
                     });
-
-                    const data = await response.json();
-                    if(data.error) throw new Error(data.error.message);
-
+                    
+                    const data = await res.json();
                     const result = JSON.parse(data.choices[0].message.content);
                     
-                    // 打印思考过程（可选，让你看到他在想什么）
-                    console.log("Jarvis Thought:", result.thought);
-
-                    // 执行回复
                     UI.showBubble(result.reply);
                     Voice.speak(result.reply);
-                    Visual.setState(result.action || 'speaking');
-
-                } catch (error) {
-                    UI.showBubble("Connection Lost. Re-calibrating.");
-                    console.error(error);
-                } finally {
-                    this.isThinking = false;
-                    UI.setLoading(false);
-                    setTimeout(() => Visual.setState('idle'), 5000);
+                    Visual.setState('idle');
+                    SFX.confirm();
+                    
+                } catch(e) {
+                    UI.showBubble("Connection Failed");
+                    Visual.setState('warning');
+                    SFX.click(); // Error sound substitute
                 }
             }
         };
 
-        /**
-         * 🔊 语音模块 (更稳定的实现)
-         */
-        const Voice = {
-            synth: window.speechSynthesis,
-            enabled: true,
-            
-            speak(text) {
-                if (!this.enabled) return;
-                this.synth.cancel();
-                const utt = new SpeechSynthesisUtterance(text);
-                // 尝试选一个更像 Jarvis 的声音
-                const voices = this.synth.getVoices();
-                const zhVoice = voices.find(v => v.lang.includes('zh') && v.name.includes('Google')); // Android/Chrome 优选
-                if (zhVoice) utt.voice = zhVoice;
-                
-                utt.rate = 1.0;
-                utt.pitch = 0.9; // 压低一点
-                this.synth.speak(utt);
-            }
-        };
-
-        /**
-         * 🎨 视觉模块 (粒子核心)
-         */
+        // 🎨 视觉
         const Visual = {
-            canvas: document.getElementById('main-canvas'),
             ctx: document.getElementById('main-canvas').getContext('2d'),
-            particles: [],
             state: 'idle',
-            
+            particles: [],
             init() {
-                this.canvas.width = 300; this.canvas.height = 300;
-                for(let i=0; i<80; i++) this.particles.push(this.createParticle());
+                document.getElementById('main-canvas').width = 280;
+                document.getElementById('main-canvas').height = 280;
+                for(let i=0;i<60;i++) this.particles.push({a:Math.random()*6.28, r:Math.random()*100+20, s:Math.random()*0.02+0.01});
                 this.animate();
             },
-            
-            createParticle() {
-                return {
-                    angle: Math.random() * Math.PI * 2,
-                    radius: 40 + Math.random() * 80,
-                    speed: 0.01 + Math.random() * 0.02,
-                    size: 1 + Math.random() * 2
-                };
-            },
-
             setState(s) { this.state = s; },
-
             animate() {
-                this.ctx.clearRect(0,0,300,300);
-                this.ctx.translate(150, 150);
-                
-                // 颜色逻辑
-                let color = '#00f2fe'; // idle
-                let speedMult = 1;
-                if (this.state === 'thinking') { color = '#a29bfe'; speedMult = 5; }
-                if (this.state === 'warning') { color = '#ff4757'; speedMult = 2; }
-
+                this.ctx.clearRect(0,0,280,280);
+                this.ctx.translate(140,140);
+                const color = this.state==='thinking' ? '#a29bfe' : (this.state==='warning'?'#ff4757':'#00f2fe');
                 this.ctx.fillStyle = color;
-                this.ctx.strokeStyle = color;
-
+                
                 this.particles.forEach(p => {
-                    p.angle += p.speed * speedMult;
-                    const x = Math.cos(p.angle) * p.radius;
-                    const y = Math.sin(p.angle) * p.radius;
-                    
+                    p.a += p.s * (this.state==='thinking'?5:1);
                     this.ctx.beginPath();
-                    this.ctx.arc(x, y, p.size, 0, Math.PI*2);
+                    this.ctx.arc(Math.cos(p.a)*p.r, Math.sin(p.a)*p.r, 2, 0, 6.28);
                     this.ctx.fill();
-                    
-                    // 连线特效
-                    this.particles.forEach(p2 => {
-                        const dx = x - Math.cos(p2.angle)*p2.radius;
-                        const dy = y - Math.sin(p2.angle)*p2.radius;
-                        const dist = Math.sqrt(dx*dx + dy*dy);
-                        if (dist < 40) {
-                            this.ctx.globalAlpha = 1 - dist/40;
-                            this.ctx.beginPath();
-                            this.ctx.moveTo(x, y);
-                            this.ctx.lineTo(Math.cos(p2.angle)*p2.radius, Math.sin(p2.angle)*p2.radius);
-                            this.ctx.stroke();
-                        }
-                    });
                 });
                 
-                this.ctx.globalAlpha = 1;
-                // 中心核心
-                this.ctx.beginPath();
-                this.ctx.arc(0,0,30,0,Math.PI*2);
-                this.ctx.shadowBlur = 20;
-                this.ctx.shadowColor = color;
-                this.ctx.fillStyle = '#fff';
-                this.ctx.fill();
-                this.ctx.shadowBlur = 0;
-
-                this.ctx.translate(-150, -150);
+                this.ctx.beginPath(); this.ctx.arc(0,0,15,0,6.28); this.ctx.fill();
+                this.ctx.translate(-140,-140);
                 requestAnimationFrame(this.animate.bind(this));
             }
         };
 
         const UI = {
-            bubble: document.getElementById('chat-bubble'),
-            loader: document.getElementById('loading-ring'),
-            
-            showBubble(text) {
-                this.bubble.innerText = text;
-                this.bubble.classList.add('visible');
-                // 自动隐藏
-                clearTimeout(this.timer);
-                this.timer = setTimeout(() => this.bubble.classList.remove('visible'), 8000);
-            },
-            
-            setLoading(isLoading) {
-                this.loader.style.display = isLoading ? 'block' : 'none';
+            showBubble(t) { 
+                const b = document.getElementById('chat-bubble'); 
+                b.innerText = t; b.classList.add('visible'); 
+                setTimeout(()=>b.classList.remove('visible'), 6000);
             }
         };
 
-        // --- 启动序列 ---
+        // 初始化
         Sensors.init();
+        Voice.init();
         Visual.init();
-
-        document.getElementById('mic-btn').onclick = () => {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return alert("System Error: Voice module missing.");
-            
-            const rec = new SpeechRecognition();
-            rec.lang = 'zh-CN';
-            rec.onstart = () => { 
-                document.getElementById('mic-btn').classList.add('active');
-                UI.showBubble("Listening...");
-            };
-            rec.onend = () => document.getElementById('mic-btn').classList.remove('active');
-            rec.onresult = (e) => {
-                Brain.process(e.results[0][0].transcript);
-            };
-            rec.start();
-        };
         
-        // 激活音频上下文
-        document.body.onclick = () => { window.speechSynthesis.speak(new SpeechSynthesisUtterance(" ")); document.body.onclick = null; };
+        // 交互绑定
+        document.getElementById('mic-btn').onclick = () => {
+            SFX.click();
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if(!SR) return alert("Browser not supported");
+            const r = new SR();
+            r.lang = 'zh-CN';
+            r.onstart = () => { UI.showBubble("Listening..."); Visual.setState('thinking'); };
+            r.onresult = e => Brain.think(e.results[0][0].transcript);
+            r.start();
+        };
+
+        const setPanel = document.getElementById('settings-panel');
+        document.getElementById('setting-btn').onclick = () => {
+            SFX.click();
+            setPanel.style.display = 'flex';
+        };
+        document.getElementById('close-settings').onclick = () => {
+            SFX.click();
+            setPanel.style.display = 'none';
+        };
+
+        // 第一次点击激活 AudioContext
+        document.body.onclick = () => { SFX.playTone(0,'sine',0); document.body.onclick = null; };
 
     </script>
 </body>
